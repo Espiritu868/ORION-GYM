@@ -16,7 +16,6 @@ class AuthController {
 
             $rtn = CLIENT_RTN;
 
-            // Validate license against CAESOLUTION API
             $apiUrl = API_LICENSE_URL;
             
             $context = stream_context_create([
