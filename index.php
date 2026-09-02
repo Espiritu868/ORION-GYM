@@ -14,20 +14,32 @@ $page = $_GET['page'] ?? 'dashboard';
     <?php include 'includes/sidebar.php'; ?>
     
     <!-- Main Content -->
-    <div class="col-md-10 flex-grow-1">
+    <div id="main-content">
         <div class="topbar">
-            <h5 class="mb-0">
-                <?php 
-                    echo match($page) {
-                        'dashboard' => 'Dashboard',
-                        'clientes' => 'Gestión de Miembros',
-                        'membresias' => 'Membresías',
-                        'caja' => 'Control de Caja',
-                        'usuarios' => 'Gestión de Usuarios',
-                        default => 'Módulo'
-                    };
-                ?>
-            </h5>
+            <div class="d-flex align-items-center">
+                <button class="btn btn-light me-3 d-none d-md-block" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <button class="btn btn-light me-3 d-md-none" id="sidebarToggleMobile">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h5 class="mb-0 fw-bold">
+                    <?php 
+                        echo match($page) {
+                            'dashboard' => 'Dashboard',
+                            'clientes' => 'Gestión de Miembros',
+                            'membresias' => 'Membresías',
+                            'caja' => 'Control de Caja',
+                            'usuarios' => 'Gestión de Usuarios',
+                            'administracion' => 'Configuración',
+                            default => 'Módulo'
+                        };
+                    ?>
+                </h5>
+            </div>
+            <div>
+                <!-- Opcional: Info de usuario o notificaciones aquí -->
+            </div>
         </div>
         
         <div class="content">
@@ -58,4 +70,27 @@ $page = $_GET['page'] ?? 'dashboard';
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const toggleMobileBtn = document.getElementById('sidebarToggleMobile');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            document.body.classList.toggle('sidebar-collapsed');
+        }
+
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('show');
+        }
+
+        if(toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
+        if(toggleMobileBtn) toggleMobileBtn.addEventListener('click', toggleMobileSidebar);
+    });
+</script>
+
 <?php include 'includes/footer.php'; ?>

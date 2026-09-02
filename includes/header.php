@@ -12,11 +12,56 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { background: #f8fafc; color: #333; font-family: 'Outfit'; }
-        .sidebar { min-height: 100vh; background: #0f172a; color: white; padding: 20px;}
+        body { background: #f8fafc; color: #333; font-family: 'Outfit'; overflow-x: hidden; }
+        
+        .sidebar { 
+            min-height: 100vh; 
+            background: #0f172a; 
+            color: white; 
+            padding: 20px;
+            width: 250px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1040;
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            left: -250px;
+        }
+        
+        #main-content {
+            transition: all 0.3s ease;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            min-height: 100vh;
+        }
+        #main-content.expanded {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { left: -250px; }
+            .sidebar.show { left: 0; }
+            #main-content { margin-left: 0; width: 100%; }
+            #main-content.expanded { margin-left: 0; width: 100%; }
+        }
+
+        /* Modal centering relative to the white panel */
+        body:not(.sidebar-collapsed) .modal {
+            padding-left: 250px !important;
+        }
+        body.sidebar-collapsed .modal {
+            padding-left: 0 !important;
+        }
+        @media (max-width: 768px) {
+            body:not(.sidebar-collapsed) .modal { padding-left: 0 !important; }
+        }
+
         .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: 10px; border-radius: 5px; margin-bottom: 5px;}
         .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; }
-        .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center;}
+        .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;}
         .content { padding: 30px; }
         .table-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .client-photo-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }

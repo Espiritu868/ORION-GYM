@@ -71,6 +71,42 @@ class ClientController {
         $success = $clientModel->changeState($id, 1);
         echo json_encode(['success' => $success, 'message' => $success ? 'Cliente reactivado.' : 'Error al reactivar.']);
     }
+
+    public function cleanup() {
+        if (!hasPerm('clientes_delete')) {
+            echo json_encode(['success' => false, 'message' => 'No autorizado para limpieza.']);
+            return;
+        }
+
+        $meses = intval($_POST['meses'] ?? 3);
+        if ($meses < 1) {
+            echo json_encode(['success' => false, 'message' => 'Cantidad de meses inválida.']);
+            return;
+        }
+
+        $clientModel = new Client();
+        // Here we need to run a query to update state of clients
+        // that don't have any membership with fecha_fin > (Today - X months).
+        
+        $database = new Database();
+        $db = $database->getConnection();
+        
+        $sql = "UPDATE CLIENTES SET estado = 0 
+                WHERE estado = 1 
+                AND id_cliente NOT IN (
+                    SELECT id_cliente FROM MEMBRESIAS 
+                    WHERE fecha_fin >= DATEADD(month, -?, GETDATE())
+                )";
+                
+        try {
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$meses]);
+            $count = $stmt->rowCount();
+            echo json_encode(['success' => true, 'message' => "Limpieza completada. $count cliente(s) inactivo(s) desactivado(s)."]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
 }
 
 // Router

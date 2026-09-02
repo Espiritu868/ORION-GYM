@@ -1,4 +1,4 @@
-<div class="sidebar col-md-2 d-none d-md-flex flex-column">
+<div class="sidebar d-none d-md-flex flex-column" id="sidebar">
     <h4 class="text-center mb-4 text-white font-weight-bold" style="font-family: 'Outfit';"><?= SYSTEM_NAME ?></h4>
     
     <?php if(hasPerm('dashboard_view')): ?>
