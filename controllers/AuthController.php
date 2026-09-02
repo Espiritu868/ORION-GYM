@@ -1,17 +1,10 @@
 <?php
 session_start();
+require_once dirname(__DIR__) . '/config/config.php';
 require_once dirname(__DIR__) . '/models/User.php';
 
 class AuthController {
     
-    public function index() {
-        if (isset($_SESSION['user_id'])) {
-            header('Location: ' . BASE_URL . 'index.php?controller=dashboard&action=index');
-            exit;
-        }
-        require_once dirname(__DIR__) . '/views/login.php';
-    }
-
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = $_POST['username'] ?? '';
@@ -26,7 +19,6 @@ class AuthController {
             // Validate license against CAESOLUTION API
             $apiUrl = API_LICENSE_URL;
             
-            // Allow self-signed certs for local development if needed
             $context = stream_context_create([
                 "ssl" => [
                     "verify_peer" => false,
@@ -74,8 +66,15 @@ class AuthController {
 
     public function logout() {
         session_destroy();
-        header('Location: ' . BASE_URL . 'index.php?controller=auth&action=index');
+        header('Location: ../login.php');
         exit;
     }
+}
+
+// Router for this controller
+$action = $_GET['action'] ?? '';
+$controller = new AuthController();
+if (method_exists($controller, $action)) {
+    $controller->$action();
 }
 ?>
