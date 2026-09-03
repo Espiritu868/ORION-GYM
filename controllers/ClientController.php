@@ -107,6 +107,87 @@ class ClientController {
             echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
         }
     }
+
+    public function photo() {
+        $id = intval($_GET['id_cliente'] ?? 0);
+        $thumb = isset($_GET['thumb']) && $_GET['thumb'] == 'true';
+        if (!$id) {
+            header('HTTP/1.1 404 Not Found');
+            exit;
+        }
+
+        $cacheDir = dirname(__DIR__) . '/uploads/thumbs';
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0777, true);
+        }
+
+        $cacheFile = $cacheDir . '/' . $id . ($thumb ? '_thumb' : '_full') . '.jpg';
+
+        if (file_exists($cacheFile)) {
+            header('Cache-Control: max-age=604800, public');
+            header('Content-Type: image/jpeg');
+            readfile($cacheFile);
+            exit;
+        }
+
+        $clientModel = new Client();
+        $photo = $clientModel->getPhoto($id);
+        
+        if ($photo) {
+            if (preg_match('/^data:image\/(\w+);base64,/', $photo, $matches)) {
+                $type = $matches[1];
+                $data = substr($photo, strpos($photo, ',') + 1);
+                $data = str_replace(' ', '+', $data); // Fix spaces to pluses
+                $data = base64_decode($data);
+
+                // Increase memory limit for large images
+                ini_set('memory_limit', '512M');
+                
+                $im = false;
+                if (extension_loaded('gd')) {
+                    $im = @imagecreatefromstring($data);
+                }
+                if ($im !== false) {
+                    if ($thumb) {
+                        $width = imagesx($im);
+                        $height = imagesy($im);
+                        $newWidth = 100;
+                        $newHeight = floor($height * ($newWidth / $width));
+                        $finalImg = imagecreatetruecolor($newWidth, $newHeight);
+                        // white background
+                        $bg = imagecolorallocate($finalImg, 255, 255, 255);
+                        imagefill($finalImg, 0, 0, $bg);
+                        imagecopyresampled($finalImg, $im, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                    } else {
+                        $finalImg = $im;
+                    }
+
+                    header('Cache-Control: max-age=604800, public');
+                    header('Content-Type: image/jpeg');
+                    // Cache to disk
+                    imagejpeg($finalImg, $cacheFile, 80);
+                    // Output
+                    readfile($cacheFile);
+
+                    if ($thumb) imagedestroy($finalImg);
+                    if ($im !== $finalImg) imagedestroy($im);
+                    exit;
+                } else {
+                    // Fallback if GD fails (e.g. extension not loaded or memory limit exceeded)
+                    // We can at least save the raw decoded data to the cache file so next time it's fast!
+                    file_put_contents($cacheFile, $data);
+                    header('Cache-Control: max-age=604800, public');
+                    header("Content-Type: image/$type");
+                    echo $data;
+                    exit;
+                }
+            }
+        }
+
+        // If no photo, output 404
+        header('HTTP/1.1 404 Not Found');
+        exit;
+    }
 }
 
 // Router

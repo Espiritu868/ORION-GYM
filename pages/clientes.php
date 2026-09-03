@@ -90,6 +90,7 @@
   </div>
 </div>
 
+
 <script>
     let clients = [];
     let pollingInterval = null;
@@ -130,7 +131,16 @@
         }
 
         filtered.forEach(c => {
-            const imgTag = c.fotografia ? `<img src="${c.fotografia}" class="client-photo-sm">` : '<div class="client-photo-sm bg-secondary text-white d-flex align-items-center justify-content-center"><i class="fas fa-user"></i></div>';
+            const photoUrl = `controllers/ClientController.php?action=photo&id_cliente=${c.id_cliente}&thumb=true`;
+            const fullPhotoUrl = `controllers/ClientController.php?action=photo&id_cliente=${c.id_cliente}`;
+            const imgTag = c.tiene_foto == 1 
+                ? `<div class="position-relative d-inline-block" style="width:40px; height:40px; cursor: pointer;" onclick="previewPhoto('${fullPhotoUrl}', '${c.nombre_completo.replace(/'/g, "\\'")}', '${c.identidad || '-'}', '${c.telefono || '-'}')">
+                       <div class="placeholder-glow w-100 h-100 position-absolute top-0 start-0 rounded-circle" id="pl-${c.id_cliente}">
+                           <span class="placeholder col-12 h-100 rounded-circle"></span>
+                       </div>
+                       <img src="${photoUrl}" class="client-photo-sm position-absolute top-0 start-0 border shadow-sm" style="opacity:0; transition: opacity 0.3s;" onload="this.style.opacity=1; document.getElementById('pl-${c.id_cliente}')?.remove();">
+                   </div>`
+                : `<div class="client-photo-sm bg-secondary text-white d-flex align-items-center justify-content-center border shadow-sm"><i class="fas fa-user"></i></div>`;
             const isActive = c.estado == 1;
             
             let btns = '';
@@ -182,9 +192,10 @@
         document.getElementById('clie-email').value = c.email || '';
         document.getElementById('clie-direccion').value = c.direccion || '';
         
-        if (c.fotografia) {
-            document.getElementById('clie-fotografia').value = c.fotografia;
-            document.getElementById('photo-preview').src = c.fotografia;
+        if (c.tiene_foto == 1) {
+            // Do NOT populate clie-fotografia input so we don't resend the base64 string unless changed
+            const timestamp = new Date().getTime();
+            document.getElementById('photo-preview').src = `controllers/ClientController.php?action=photo&id_cliente=${c.id_cliente}&t=${timestamp}`;
             document.getElementById('photo-preview').style.display = 'block';
         }
     }

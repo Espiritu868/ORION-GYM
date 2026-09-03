@@ -55,7 +55,31 @@ class MembershipController {
 
         echo json_encode([
             'success' => $success, 
-            'message' => $success ? 'Membresía asignada correctamente.' : 'Error al asignar membresía.'
+            'message' => $success ? 'Membresía asignada correctamente (Pendiente de Pago).' : 'Error al asignar membresía.'
+        ]);
+    }
+
+    public function update() {
+        if (!hasPerm('membresias_edit')) {
+            echo json_encode(['success' => false, 'message' => 'No autorizado']);
+            return;
+        }
+
+        $idMembresia = $_POST['id_membresia'] ?? '';
+        $idPlan = $_POST['id_plan'] ?? '';
+        $fechaInicio = $_POST['fecha_inicio'] ?? '';
+
+        if (empty($idMembresia) || empty($idPlan) || empty($fechaInicio)) {
+            echo json_encode(['success' => false, 'message' => 'Todos los campos son requeridos.']);
+            return;
+        }
+
+        $membershipModel = new Membership();
+        $success = $membershipModel->updatePending($idMembresia, $idPlan, $fechaInicio);
+
+        echo json_encode([
+            'success' => $success, 
+            'message' => $success ? 'Membresía actualizada correctamente.' : 'Error al actualizar o la membresía ya no está pendiente.'
         ]);
     }
 

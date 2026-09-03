@@ -49,14 +49,22 @@
         }
 
         /* Modal centering relative to the white panel */
-        body:not(.sidebar-collapsed) .modal {
-            padding-left: 250px !important;
+        body:not(.sidebar-collapsed) .modal,
+        body:not(.sidebar-collapsed) .modal-backdrop {
+            left: 250px !important;
+            width: calc(100% - 250px) !important;
         }
-        body.sidebar-collapsed .modal {
-            padding-left: 0 !important;
+        body.sidebar-collapsed .modal,
+        body.sidebar-collapsed .modal-backdrop {
+            left: 0 !important;
+            width: 100% !important;
         }
         @media (max-width: 768px) {
-            body:not(.sidebar-collapsed) .modal { padding-left: 0 !important; }
+            body:not(.sidebar-collapsed) .modal,
+            body:not(.sidebar-collapsed) .modal-backdrop { 
+                left: 0 !important; 
+                width: 100% !important; 
+            }
         }
 
         .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: 10px; border-radius: 5px; margin-bottom: 5px;}

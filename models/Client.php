@@ -10,7 +10,9 @@ class Client {
     }
 
     public function listAll($activeOnly = true) {
-        $sql = "SELECT * FROM CLIENTES";
+        $sql = "SELECT id_cliente, identidad, nombre_completo, telefono, email, direccion, estado, fecha_ingreso, 
+                CASE WHEN DATALENGTH(fotografia) > 0 THEN 1 ELSE 0 END AS tiene_foto 
+                FROM CLIENTES";
         if ($activeOnly) {
             $sql .= " WHERE estado = 1";
         }
@@ -18,6 +20,13 @@ class Client {
         
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getPhoto($id) {
+        $sql = "SELECT fotografia FROM CLIENTES WHERE id_cliente = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetchColumn();
     }
 
     public function create($data) {
@@ -35,24 +44,43 @@ class Client {
     }
 
     public function update($id, $data) {
-        $sql = "UPDATE CLIENTES SET 
-                identidad = ?, 
-                nombre_completo = ?, 
-                telefono = ?, 
-                email = ?, 
-                direccion = ?, 
-                fotografia = ? 
-                WHERE id_cliente = ?";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([
-            $data['identidad'],
-            $data['nombre_completo'],
-            $data['telefono'],
-            $data['email'],
-            $data['direccion'],
-            $data['fotografia'],
-            $id
-        ]);
+        if (!empty($data['fotografia'])) {
+            $sql = "UPDATE CLIENTES SET 
+                    identidad = ?, 
+                    nombre_completo = ?, 
+                    telefono = ?, 
+                    email = ?, 
+                    direccion = ?, 
+                    fotografia = ? 
+                    WHERE id_cliente = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                $data['identidad'],
+                $data['nombre_completo'],
+                $data['telefono'],
+                $data['email'],
+                $data['direccion'],
+                $data['fotografia'],
+                $id
+            ]);
+        } else {
+            $sql = "UPDATE CLIENTES SET 
+                    identidad = ?, 
+                    nombre_completo = ?, 
+                    telefono = ?, 
+                    email = ?, 
+                    direccion = ? 
+                    WHERE id_cliente = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([
+                $data['identidad'],
+                $data['nombre_completo'],
+                $data['telefono'],
+                $data['email'],
+                $data['direccion'],
+                $id
+            ]);
+        }
     }
 
     public function changeState($id, $state) {

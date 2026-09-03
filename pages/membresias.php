@@ -45,19 +45,23 @@
 
 <!-- Modal Asignar Plan -->
 <div class="modal fade" id="assignModal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content shadow-lg border-0">
       <form id="assign-form">
           <div class="modal-header">
-            <h5 class="modal-title">Asignar Nuevo Plan</h5>
+            <h5 class="modal-title text-primary"><i class="fas fa-id-card"></i> Asignar Nuevo Plan</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-              <div class="mb-3">
-                  <label>Seleccionar Cliente *</label>
-                  <select class="form-select" id="assign-cliente" name="id_cliente" required>
-                      <!-- Populated via JS -->
-                  </select>
+              <div class="mb-4">
+                  <label class="form-label fw-bold">Seleccionar Cliente *</label>
+                  <div class="input-group">
+                      <input type="hidden" id="assign-cliente-id" name="id_cliente">
+                      <input type="text" class="form-control" id="assign-cliente-name" placeholder="Ningún cliente seleccionado" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+                      <button class="btn btn-primary" type="button" onclick="openSearchClientModal()">
+                          <i class="fas fa-search"></i> Buscar Cliente
+                      </button>
+                  </div>
               </div>
               <div class="mb-3">
                   <label>Seleccionar Plan *</label>
@@ -72,19 +76,89 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Asignar Membresía</button>
+            <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Asignar Membresía</button>
           </div>
       </form>
     </div>
   </div>
 </div>
 
+<!-- Modal Editar Membresía (Solo Pendientes) -->
+<div class="modal fade" id="editMembershipModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content shadow-lg border-0">
+      <form id="edit-memb-form">
+          <input type="hidden" id="edit-memb-id" name="id_membresia">
+          <div class="modal-header">
+            <h5 class="modal-title text-primary"><i class="fas fa-edit"></i> Editar Membresía Pendiente</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+              <div class="mb-4">
+                  <label class="form-label fw-bold">Cliente</label>
+                  <input type="text" class="form-control" id="edit-memb-cliente-name" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
+              </div>
+              <div class="mb-3">
+                  <label>Seleccionar Plan *</label>
+                  <select class="form-select" id="edit-memb-plan" name="id_plan" required>
+                      <!-- Populated via JS -->
+                  </select>
+              </div>
+              <div class="mb-3">
+                  <label>Fecha de Inicio *</label>
+                  <input type="date" class="form-control" id="edit-memb-fecha" name="fecha_inicio" required>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Cambios</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Modal Buscar Cliente -->
+<div class="modal fade" id="searchClientModal" tabindex="-1" style="z-index: 1060;">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content shadow-lg border-0">
+      <div class="modal-header">
+        <h5 class="modal-title text-primary"><i class="fas fa-users"></i> Buscar Cliente</h5>
+        <button type="button" class="btn-close" onclick="closeSearchClientModal()"></button>
+      </div>
+      <div class="modal-body p-4">
+        <input type="text" id="search-client-input" class="form-control form-control-lg mb-3" placeholder="Buscar por Nombre o Identidad...">
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover align-middle">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th>Foto</th>
+                        <th>Nombre</th>
+                        <th>Identidad</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="search-clients-tbody">
+                    <!-- Populated via JS -->
+                </tbody>
+            </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
     let membresias = [];
+    let allClientsList = [];
     let assignModal;
+    let searchClientModal;
+    let editMembershipModal;
 
     document.addEventListener('DOMContentLoaded', () => {
         assignModal = new bootstrap.Modal(document.getElementById('assignModal'));
+        searchClientModal = new bootstrap.Modal(document.getElementById('searchClientModal'));
+        editMembershipModal = new bootstrap.Modal(document.getElementById('editMembershipModal'));
         
         loadMembresias();
 
@@ -120,12 +194,6 @@
         }
 
         filtered.forEach(m => {
-            const imgTag = m.fotografia ? `<img src="${m.fotografia}" class="client-photo-sm">` : '<div class="client-photo-sm bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 50%;"><i class="fas fa-user"></i></div>';
-            
-            // Format dates
-            const fInicio = new Date(m.fecha_inicio).toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
-            const fFin = new Date(m.fecha_fin).toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
-
             let badgeColor = 'success';
             let statusText = m.estado_ui;
             let subText = `Faltan ${m.dias_restantes} días`;
@@ -133,7 +201,11 @@
             if (progress > 100) progress = 100;
             if (progress < 0) progress = 0;
 
-            if (m.estado_ui === 'Por Vencer') {
+            if (m.estado_ui === 'Pendiente') {
+                badgeColor = 'warning';
+                subText = 'Pendiente de cobro en Caja';
+                progress = 0;
+            } else if (m.estado_ui === 'Por Vencer') {
                 badgeColor = 'warning';
             } else if (m.estado_ui === 'Vencida') {
                 badgeColor = 'danger';
@@ -146,16 +218,33 @@
                 subText = `Cancelada el ${fCanc}`;
             }
 
+            const photoUrl = `controllers/ClientController.php?action=photo&id_cliente=${m.id_cliente}&thumb=true`;
+            const fullPhotoUrl = `controllers/ClientController.php?action=photo&id_cliente=${m.id_cliente}`;
+            
+            const imgTag = m.tiene_foto == 1 
+                ? `<div class="position-relative d-inline-block" style="width:40px; height:40px; cursor: pointer;" onclick="previewPhoto('${fullPhotoUrl}', '${m.nombre_completo.replace(/'/g, "\\'")}', '${m.identidad || '-'}', '${m.telefono || '-'}', '${statusText}', '${badgeColor}', '${subText}')">
+                       <img src="${photoUrl}" class="rounded-circle object-fit-cover w-100 h-100 border shadow-sm">
+                   </div>`
+                : `<div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-circle border shadow-sm" style="width:40px;height:40px;font-size:16px;"><i class="fas fa-user"></i></div>`;
+            
+            // Format dates
+            const fInicio = new Date(m.fecha_inicio).toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const fFin = new Date(m.fecha_fin).toLocaleDateString('es-HN', { day: '2-digit', month: 'short', year: 'numeric' });
+
             let btns = '';
+            
             <?php if(hasPerm('membresias_edit')): ?>
+            if (m.estado_ui === 'Pendiente') {
+                btns += `<button class="btn btn-sm btn-primary me-1" onclick="editMembership(${m.id_membresia})" title="Editar Plan"><i class="fas fa-edit"></i></button>`;
+            }
             if (m.estado_ui !== 'Cancelada') {
-                btns += `<button class="btn btn-sm btn-primary me-1" onclick="renewMembership(${m.id_membresia})" title="Renovar"><i class="fas fa-sync"></i></button>`;
+                btns += `<a href="index.php?page=caja&id_cliente=${m.id_cliente}" class="btn btn-sm btn-success me-1" title="Cobrar / Renovar en Caja"><i class="fas fa-cash-register"></i></a>`;
             }
             <?php endif; ?>
             
             <?php if(hasPerm('membresias_delete')): ?>
             if (m.estado_ui !== 'Cancelada') {
-                btns += `<button class="btn btn-sm btn-danger" onclick="cancelMembership(${m.id_membresia})" title="Cancelar"><i class="fas fa-times"></i></button>`;
+                btns += `<button class="btn btn-sm btn-danger" onclick="cancelMembership(${m.id_membresia})" title="Eliminar/Cancelar"><i class="fas fa-trash"></i></button>`;
             }
             <?php endif; ?>
 
@@ -195,12 +284,6 @@
             .then(r => r.json())
             .then(res => {
                 if (res.success) {
-                    const selectC = document.getElementById('assign-cliente');
-                    selectC.innerHTML = '<option value="">Seleccione un cliente...</option>';
-                    res.clients.forEach(c => {
-                        selectC.innerHTML += `<option value="${c.id_cliente}">${c.nombre_completo} (${c.identidad || 'Sin ID'})</option>`;
-                    });
-
                     const selectP = document.getElementById('assign-plan');
                     selectP.innerHTML = '<option value="">Seleccione un plan...</option>';
                     res.plans.forEach(p => {
@@ -208,6 +291,8 @@
                     });
 
                     document.getElementById('assign-form').reset();
+                    document.getElementById('assign-cliente-id').value = '';
+                    document.getElementById('assign-cliente-name').value = '';
                     document.getElementById('assign-fecha').value = new Date().toISOString().split('T')[0];
                     assignModal.show();
                 }
@@ -216,6 +301,13 @@
 
     document.getElementById('assign-form').addEventListener('submit', function(e) {
         e.preventDefault();
+        
+        const idCliente = document.getElementById('assign-cliente-id').value;
+        if (!idCliente) {
+            Swal.fire('Atención', 'Debe seleccionar un cliente primero utilizando el botón de Buscar Cliente.', 'warning');
+            return;
+        }
+
         fetch('controllers/MembershipController.php?action=assign', {
             method: 'POST',
             body: new FormData(this)
@@ -274,4 +366,140 @@
             }
         });
     }
+
+    function openSearchClientModal() {
+        assignModal.hide();
+        searchClientModal.show();
+        document.getElementById('search-clients-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i><br>Cargando clientes...</td></tr>';
+        
+        fetch('controllers/ClientController.php?action=list&active=0')
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    allClientsList = data.data;
+                    renderSearchClients();
+                }
+            });
+    }
+
+    function closeSearchClientModal() {
+        searchClientModal.hide();
+    }
+
+    document.getElementById('searchClientModal').addEventListener('hidden.bs.modal', function () {
+        assignModal.show();
+    });
+
+    document.getElementById('search-client-input').addEventListener('input', renderSearchClients);
+
+    function renderSearchClients() {
+        const q = document.getElementById('search-client-input').value.toLowerCase();
+        const tbody = document.getElementById('search-clients-tbody');
+        tbody.innerHTML = '';
+
+        const filtered = allClientsList.filter(c => 
+            c.nombre_completo.toLowerCase().includes(q) || 
+            (c.identidad && c.identidad.toLowerCase().includes(q))
+        );
+
+        if(filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No se encontraron clientes.</td></tr>';
+            return;
+        }
+
+        filtered.forEach(c => {
+            const photoUrl = `controllers/ClientController.php?action=photo&id_cliente=${c.id_cliente}&thumb=true`;
+            const fullPhotoUrl = `controllers/ClientController.php?action=photo&id_cliente=${c.id_cliente}`;
+            
+            const imgTag = c.tiene_foto == 1 
+                ? `<div class="position-relative d-inline-block" style="width:30px; height:30px; cursor: pointer;" onclick="previewPhoto('${fullPhotoUrl}', '${c.nombre_completo.replace(/'/g, "\\'")}', '${c.identidad || '-'}', '${c.telefono || '-'}')">
+                       <img src="${photoUrl}" class="rounded-circle object-fit-cover w-100 h-100 border shadow-sm">
+                   </div>`
+                : `<div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded-circle border shadow-sm" style="width:30px;height:30px;font-size:12px;"><i class="fas fa-user"></i></div>`;
+            
+            const isActive = c.estado == 1;
+            let actionBtn = isActive 
+                ? `<button class="btn btn-sm btn-primary" onclick="selectClientForPlan(${c.id_cliente}, '${c.nombre_completo.replace(/'/g, "\\'")}')">Seleccionar</button>`
+                : `<button class="btn btn-sm btn-warning" onclick="reactivateClientFromSearch(${c.id_cliente})"><i class="fas fa-sync"></i> Reactivar</button>`;
+
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${imgTag}</td>
+                    <td class="fw-bold">${c.nombre_completo}</td>
+                    <td>${c.identidad || '-'}</td>
+                    <td><span class="badge bg-${isActive ? 'success' : 'secondary'}">${isActive ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>${actionBtn}</td>
+                </tr>
+            `);
+        });
+    }
+
+    function selectClientForPlan(id, name) {
+        document.getElementById('assign-cliente-id').value = id;
+        document.getElementById('assign-cliente-name').value = name;
+        closeSearchClientModal();
+    }
+
+    function reactivateClientFromSearch(id) {
+        const fd = new FormData();
+        fd.append('id_cliente', id);
+        fetch('controllers/ClientController.php?action=activate', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    Swal.fire({icon: 'success', title: 'Reactivado', text: 'El cliente ha sido reactivado correctamente.', timer: 1500, showConfirmButton: false});
+                    // Refresh list
+                    fetch('controllers/ClientController.php?action=list&active=0')
+                        .then(r => r.json())
+                        .then(data => {
+                            if(data.success) {
+                                allClientsList = data.data;
+                                renderSearchClients();
+                            }
+                        });
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            });
+    }
+
+    function editMembership(idMembresia) {
+        const memb = membresias.find(m => m.id_membresia == idMembresia);
+        if(!memb) return;
+        
+        document.getElementById('edit-memb-id').value = memb.id_membresia;
+        document.getElementById('edit-memb-cliente-name').value = memb.nombre_completo;
+        document.getElementById('edit-memb-fecha').value = memb.fecha_inicio.split(' ')[0]; // ensure format YYYY-MM-DD
+        
+        // Fetch plans
+        fetch('controllers/MembershipController.php?action=getFormData')
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    const selectP = document.getElementById('edit-memb-plan');
+                    selectP.innerHTML = '';
+                    res.plans.forEach(p => {
+                        const selected = (p.id_plan == memb.id_plan) ? 'selected' : '';
+                        selectP.innerHTML += `<option value="${p.id_plan}" ${selected}>${p.nombre_plan} - L ${parseFloat(p.precio).toFixed(2)}</option>`;
+                    });
+                    editMembershipModal.show();
+                }
+            });
+    }
+
+    document.getElementById('edit-memb-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch('controllers/MembershipController.php?action=update', {
+            method: 'POST',
+            body: new FormData(this)
+        }).then(r => r.json()).then(res => {
+            if(res.success) {
+                editMembershipModal.hide();
+                Swal.fire('¡Actualizado!', res.message, 'success');
+                loadMembresias();
+            } else {
+                Swal.fire('Error', res.message, 'error');
+            }
+        });
+    });
 </script>

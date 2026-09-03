@@ -309,7 +309,7 @@
                     <td class="fw-bold">${p.nombre_plan}</td>
                     <td>${p.descripcion || '-'}</td>
                     <td>${p.duracion_dias} días</td>
-                    <td class="text-success fw-bold">L ${parseFloat(p.precio).toFixed(2)}</td>
+                    <td class="text-success fw-bold">L ${parseFloat(p.precio).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                     <td><span class="badge bg-${isActive ? 'success' : 'secondary'}">${isActive ? 'Activo' : 'Inactivo'}</span></td>
                     <td>${btns}</td>
                 </tr>
@@ -413,8 +413,8 @@
                 <tr>
                     <td><small class="text-muted">${p.codigo_barras || 'N/A'}</small></td>
                     <td class="fw-bold">${p.nombre_producto}</td>
-                    <td>L ${parseFloat(p.precio_compra).toFixed(2)}</td>
-                    <td class="text-success fw-bold">L ${parseFloat(p.precio_venta).toFixed(2)}</td>
+                    <td>L ${parseFloat(p.precio_compra).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
+                    <td class="text-success fw-bold">L ${parseFloat(p.precio_venta).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                     <td><span class="badge bg-${stockBadge}" style="font-size: 0.9em;">${p.stock} unidades</span></td>
                     <td><span class="badge bg-${isActive ? 'success' : 'secondary'}">${isActive ? 'Activo' : 'Inactivo'}</span></td>
                     <td>${btns}</td>
@@ -538,7 +538,7 @@
                                 <td><small>${dateStr}</small></td>
                                 <td><span class="badge bg-${badgeClass}">${k.tipo_movimiento}</span></td>
                                 <td class="fw-bold">${k.cantidad}</td>
-                                <td>L ${parseFloat(k.precio).toFixed(2)}</td>
+                                <td>L ${parseFloat(k.precio).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</td>
                                 <td><small>${k.descripcion || '-'}</small></td>
                                 <td><small class="text-muted">${k.nombre_usuario || '-'}</small></td>
                             </tr>
