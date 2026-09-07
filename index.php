@@ -72,6 +72,25 @@ $page = $_GET['page'] ?? 'dashboard';
 </div>
 
 <script>
+    function formatCurrencyInput(input) {
+        // Remove all non-numeric characters except for a single decimal point
+        let val = input.value.replace(/[^0-9.]/g, '');
+        
+        // Ensure only one decimal point exists
+        const parts = val.split('.');
+        if (parts.length > 2) {
+            val = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Format integer part with commas
+        if (parts[0].length > 0) {
+            parts[0] = parseInt(parts[0], 10).toLocaleString('en-US');
+            val = parts.join('.');
+        }
+        
+        input.value = val;
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('main-content');

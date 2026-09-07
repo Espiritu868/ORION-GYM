@@ -12,8 +12,11 @@ class ClientController {
         }
 
         $clientModel = new Client();
-        $activeOnly = isset($_GET['active']) && $_GET['active'] === 'true';
-        $clients = $clientModel->listAll($activeOnly);
+        $stateFilter = $_GET['active'] ?? '1';
+        if ($stateFilter === 'true') $stateFilter = '1';
+        if ($stateFilter === 'false') $stateFilter = 'all';
+
+        $clients = $clientModel->listAll($stateFilter);
         echo json_encode(['success' => true, 'data' => $clients]);
     }
 
@@ -45,6 +48,26 @@ class ClientController {
             return;
         }
 
+        if (empty($data['identidad'])) {
+            echo json_encode(['success' => false, 'message' => 'La identidad es obligatoria.']);
+            return;
+        }
+
+        if (empty($data['telefono'])) {
+            echo json_encode(['success' => false, 'message' => 'El teléfono es obligatorio.']);
+            return;
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9\-]+$/', $data['identidad'])) {
+            echo json_encode(['success' => false, 'message' => 'La identidad contiene caracteres no válidos.']);
+            return;
+        }
+
+        if (!preg_match('/^\+?[0-9\-\s]+$/', $data['telefono'])) {
+            echo json_encode(['success' => false, 'message' => 'El teléfono contiene caracteres no válidos.']);
+            return;
+        }
+
         if (empty($id)) {
             $success = $clientModel->create($data);
             $msg = 'Cliente registrado correctamente.';
@@ -60,6 +83,12 @@ class ClientController {
         if (!hasPerm('clientes_delete')) return;
         $id = $_POST['id_cliente'] ?? '';
         $clientModel = new Client();
+
+        if ($clientModel->hasActiveMembership($id)) {
+            echo json_encode(['success' => false, 'message' => 'No se puede dar de baja al cliente porque tiene una membresía activa o pendiente.']);
+            return;
+        }
+
         $success = $clientModel->changeState($id, 0);
         echo json_encode(['success' => $success, 'message' => $success ? 'Cliente desactivado (baja lógica).' : 'Error al desactivar.']);
     }
@@ -187,6 +216,29 @@ class ClientController {
         // If no photo, output 404
         header('HTTP/1.1 404 Not Found');
         exit;
+    }
+
+    public function checkIdentity() {
+        $identidad = trim($_POST['identidad'] ?? '');
+        $excludeId = $_POST['exclude_id'] ?? null;
+        
+        if (empty($identidad)) {
+            echo json_encode(['exists' => false]);
+            return;
+        }
+
+        $clientModel = new Client();
+        $result = $clientModel->checkIdentity($identidad, $excludeId);
+
+        if ($result) {
+            echo json_encode([
+                'exists' => true, 
+                'nombre' => $result['nombre_completo'], 
+                'estado' => $result['estado'] == 1 ? 'Activo' : 'Inactivo'
+            ]);
+        } else {
+            echo json_encode(['exists' => false]);
+        }
     }
 }
 

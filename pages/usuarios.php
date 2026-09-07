@@ -39,13 +39,13 @@
               <input type="hidden" id="user-id" name="id_usuario">
               
               <div class="mb-3">
-                  <label>Nombre de Usuario *</label>
-                  <input type="text" class="form-control" id="user-username" name="nombre_usuario" required autocomplete="off">
+                  <label>Nombre de Usuario <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="user-username" name="nombre_usuario" required autocomplete="off" pattern="[a-zA-Z0-9_]+" maxlength="30" title="Solo letras, números y guiones bajos, sin espacios">
               </div>
 
               <div class="mb-3">
-                  <label>Contraseña <small class="text-muted" id="user-password-hint">(Obligatoria para nuevos)</small></label>
-                  <input type="password" class="form-control" id="user-password" name="password" autocomplete="new-password">
+                  <label>Contraseña <span class="text-danger" id="user-password-asterisk">*</span> <small class="text-muted" id="user-password-hint">(Obligatoria para nuevos)</small></label>
+                  <input type="password" class="form-control" id="user-password" name="password" autocomplete="new-password" minlength="6" title="La contraseña debe tener al menos 6 caracteres">
               </div>
 
               <hr>
@@ -127,8 +127,8 @@
     });
 
     function loadUsers() {
-        const active = document.getElementById('filter-user-status').value === '1';
-        fetch(`controllers/UserController.php?action=list&active=${active}`)
+        const activeVal = document.getElementById('filter-user-status').value;
+        fetch(`controllers/UserController.php?action=list&active=${activeVal}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -191,6 +191,7 @@
         document.getElementById('user-id').value = '';
         document.getElementById('user-modal-title').textContent = 'Registrar Nuevo Usuario';
         document.getElementById('user-password').required = true;
+        document.getElementById('user-password-asterisk').style.display = 'inline';
         document.getElementById('user-password-hint').textContent = '(Obligatoria)';
         
         document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = false);
@@ -207,6 +208,7 @@
         document.getElementById('user-modal-title').textContent = 'Editar Usuario';
         
         document.getElementById('user-password').required = false;
+        document.getElementById('user-password-asterisk').style.display = 'none';
         document.getElementById('user-password-hint').textContent = '(Dejar en blanco para no cambiar)';
         
         document.querySelectorAll('.perm-checkbox').forEach(cb => {

@@ -54,7 +54,7 @@
           </div>
           <div class="modal-body">
               <div class="mb-4">
-                  <label class="form-label fw-bold">Seleccionar Cliente *</label>
+                  <label class="form-label fw-bold">Seleccionar Cliente <span class="text-danger">*</span></label>
                   <div class="input-group">
                       <input type="hidden" id="assign-cliente-id" name="id_cliente">
                       <input type="text" class="form-control" id="assign-cliente-name" placeholder="Ningún cliente seleccionado" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
@@ -64,13 +64,13 @@
                   </div>
               </div>
               <div class="mb-3">
-                  <label>Seleccionar Plan *</label>
+                  <label>Seleccionar Plan <span class="text-danger">*</span></label>
                   <select class="form-select" id="assign-plan" name="id_plan" required>
                       <!-- Populated via JS -->
                   </select>
               </div>
               <div class="mb-3">
-                  <label>Fecha de Inicio *</label>
+                  <label>Fecha de Inicio <span class="text-danger">*</span></label>
                   <input type="date" class="form-control" id="assign-fecha" name="fecha_inicio" required value="<?php echo date('Y-m-d'); ?>">
               </div>
           </div>
@@ -99,13 +99,13 @@
                   <input type="text" class="form-control" id="edit-memb-cliente-name" readonly style="background-color: #f8f9fa; cursor: not-allowed;">
               </div>
               <div class="mb-3">
-                  <label>Seleccionar Plan *</label>
+                  <label>Seleccionar Plan <span class="text-danger">*</span></label>
                   <select class="form-select" id="edit-memb-plan" name="id_plan" required>
                       <!-- Populated via JS -->
                   </select>
               </div>
               <div class="mb-3">
-                  <label>Fecha de Inicio *</label>
+                  <label>Fecha de Inicio <span class="text-danger">*</span></label>
                   <input type="date" class="form-control" id="edit-memb-fecha" name="fecha_inicio" required>
               </div>
           </div>
@@ -372,7 +372,7 @@
         searchClientModal.show();
         document.getElementById('search-clients-tbody').innerHTML = '<tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-primary mb-3"></i><br>Cargando clientes...</td></tr>';
         
-        fetch('controllers/ClientController.php?action=list&active=0')
+        fetch('controllers/ClientController.php?action=list&active=all')
             .then(res => res.json())
             .then(data => {
                 if(data.success) {
@@ -449,7 +449,7 @@
                 if(res.success) {
                     Swal.fire({icon: 'success', title: 'Reactivado', text: 'El cliente ha sido reactivado correctamente.', timer: 1500, showConfirmButton: false});
                     // Refresh list
-                    fetch('controllers/ClientController.php?action=list&active=0')
+                    fetch('controllers/ClientController.php?action=list&active=all')
                         .then(r => r.json())
                         .then(data => {
                             if(data.success) {

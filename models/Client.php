@@ -9,14 +9,14 @@ class Client {
         $this->db = $database->getConnection();
     }
 
-    public function listAll($activeOnly = true) {
+    public function listAll($stateFilter = '1') {
         $sql = "SELECT id_cliente, identidad, nombre_completo, telefono, email, direccion, estado, fecha_ingreso, 
                 CASE WHEN DATALENGTH(fotografia) > 0 THEN 1 ELSE 0 END AS tiene_foto 
                 FROM CLIENTES";
-        if ($activeOnly) {
-            $sql .= " WHERE estado = 1";
+        if ($stateFilter === '1' || $stateFilter === '0') {
+            $sql .= " WHERE estado = " . intval($stateFilter);
         }
-        $sql .= " ORDER BY nombre_completo ASC";
+        $sql .= " ORDER BY estado DESC, nombre_completo ASC";
         
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -87,6 +87,27 @@ class Client {
         $sql = "UPDATE CLIENTES SET estado = ? WHERE id_cliente = ?";
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$state, $id]);
+    }
+
+    public function checkIdentity($identidad, $excludeId = null) {
+        $sql = "SELECT nombre_completo, estado FROM CLIENTES WHERE identidad = ?";
+        $params = [$identidad];
+        if ($excludeId) {
+            $sql .= " AND id_cliente != ?";
+            $params[] = $excludeId;
+        }
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function hasActiveMembership($id_cliente) {
+        $sql = "SELECT COUNT(*) FROM MEMBRESIAS 
+                WHERE id_cliente = ? 
+                AND estado_membresia IN ('Activa', 'Pendiente')";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id_cliente]);
+        return (int)$stmt->fetchColumn() > 0;
     }
 }
 ?>

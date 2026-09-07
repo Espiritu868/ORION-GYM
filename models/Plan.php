@@ -62,5 +62,14 @@ class Plan {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$state, $id]);
     }
+
+    public function hasActiveMemberships($id_plan) {
+        $sql = "SELECT COUNT(*) FROM MEMBRESIAS 
+                WHERE id_plan = ? 
+                AND estado_membresia IN ('Activa', 'Pendiente')";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$id_plan]);
+        return (int)$stmt->fetchColumn() > 0;
+    }
 }
 ?>

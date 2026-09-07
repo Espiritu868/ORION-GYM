@@ -33,8 +33,8 @@ class ProductController {
             'codigo_barras' => trim($_POST['codigo_barras'] ?? ''),
             'nombre_producto' => trim($_POST['nombre_producto'] ?? ''),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
-            'precio_compra' => floatval($_POST['precio_compra'] ?? 0),
-            'precio_venta' => floatval($_POST['precio_venta'] ?? 0),
+            'precio_compra' => floatval(str_replace(',', '', $_POST['precio_compra'] ?? '0')),
+            'precio_venta' => floatval(str_replace(',', '', $_POST['precio_venta'] ?? '0')),
             'stock' => intval($_POST['stock'] ?? 0)
         ];
 
@@ -86,7 +86,7 @@ class ProductController {
         $id = $_POST['id_producto'] ?? '';
         $tipo = $_POST['tipo_movimiento'] ?? ''; // ENTRADA, SALIDA
         $cantidad = intval($_POST['cantidad'] ?? 0);
-        $precio = floatval($_POST['precio'] ?? 0);
+        $precio = floatval(str_replace(',', '', $_POST['precio'] ?? '0'));
         $descripcion = trim($_POST['descripcion'] ?? '');
         $idUsuario = $_SESSION['user_id'] ?? null;
 

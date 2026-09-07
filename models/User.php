@@ -61,10 +61,10 @@ class User {
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    public function listAll($activeOnly = false) {
+    public function listAll($stateFilter = 'all') {
         $sql = "SELECT id_usuario, nombre_usuario, estado_usuario FROM USUARIOS";
-        if ($activeOnly) {
-            $sql .= " WHERE estado_usuario = 1";
+        if ($stateFilter === '1' || $stateFilter === '0') {
+            $sql .= " WHERE estado_usuario = " . intval($stateFilter);
         }
         $sql .= " ORDER BY id_usuario ASC";
         

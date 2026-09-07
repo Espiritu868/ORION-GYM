@@ -44,16 +44,17 @@
               
               <div class="row">
                   <div class="col-md-6 mb-3">
-                      <label>DNI / Identidad</label>
-                      <input type="text" class="form-control" id="clie-identidad" name="identidad">
+                      <label>DNI / Identidad <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control" id="clie-identidad" name="identidad" required pattern="[a-zA-Z0-9\-]+" maxlength="20" title="Debe contener solo letras, números o guiones">
+                      <div id="identidad-feedback" class="small mt-1"></div>
                   </div>
                   <div class="col-md-6 mb-3">
-                      <label>Nombre Completo *</label>
+                      <label>Nombre Completo <span class="text-danger">*</span></label>
                       <input type="text" class="form-control" id="clie-nombre" name="nombre_completo" required>
                   </div>
                   <div class="col-md-6 mb-3">
-                      <label>Teléfono</label>
-                      <input type="text" class="form-control" id="clie-telefono" name="telefono">
+                      <label>Teléfono <span class="text-danger">*</span></label>
+                      <input type="tel" class="form-control" id="clie-telefono" name="telefono" required pattern="\+?[0-9\-\s]+" maxlength="15" title="Número telefónico válido, puede incluir '+' al inicio">
                   </div>
                   <div class="col-md-6 mb-3">
                       <label>Correo Electrónico</label>
@@ -67,9 +68,15 @@
 
               <hr>
               <h6>Fotografía del Cliente</h6>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="startQrCapture()">
-                  <i class="fas fa-qrcode"></i> Tomar Foto con el Teléfono (QR)
-              </button>
+              <div class="d-flex gap-2 mb-2">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="startQrCapture()">
+                      <i class="fas fa-qrcode"></i> Tomar Foto con el Teléfono (QR)
+                  </button>
+                  <label class="btn btn-outline-secondary btn-sm mb-0" style="cursor: pointer;">
+                      <i class="fas fa-upload"></i> Subir desde la PC
+                      <input type="file" accept="image/*" class="d-none" id="file-upload-photo" onchange="handleFileUpload(event)">
+                  </label>
+              </div>
               
               <div id="qr-container" class="qr-container">
                   <p class="text-muted small">Escanea este código con tu celular para abrir la cámara.</p>
@@ -104,8 +111,8 @@
     });
 
     function loadClients() {
-        const active = document.getElementById('filter-status').value === '1';
-        fetch(`controllers/ClientController.php?action=list&active=${active}`)
+        const activeVal = document.getElementById('filter-status').value;
+        fetch(`controllers/ClientController.php?action=list&active=${activeVal}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
@@ -176,6 +183,8 @@
         document.getElementById('photo-preview').style.display = 'none';
         document.getElementById('qr-container').style.display = 'none';
         document.getElementById('modal-title').textContent = 'Registrar Nuevo Miembro';
+        document.getElementById('identidad-feedback').innerHTML = '';
+        document.getElementById('btn-save').disabled = false;
         stopPolling();
         modal.show();
     }
@@ -191,6 +200,8 @@
         document.getElementById('clie-telefono').value = c.telefono || '';
         document.getElementById('clie-email').value = c.email || '';
         document.getElementById('clie-direccion').value = c.direccion || '';
+        document.getElementById('identidad-feedback').innerHTML = '';
+        document.getElementById('btn-save').disabled = false;
         
         if (c.tiene_foto == 1) {
             // Do NOT populate clie-fotografia input so we don't resend the base64 string unless changed
@@ -291,9 +302,93 @@
             .catch(e => console.error(e));
     }
 
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const maxSize = 800;
+
+                if (width > height && width > maxSize) {
+                    height = Math.round(height * (maxSize / width));
+                    width = maxSize;
+                } else if (height > maxSize) {
+                    width = Math.round(width * (maxSize / height));
+                    height = maxSize;
+                } else {
+                    // Si es más pequeña que maxSize, no redimensionar
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                document.getElementById('clie-fotografia').value = dataUrl;
+                document.getElementById('photo-preview').src = dataUrl;
+                document.getElementById('photo-preview').style.display = 'block';
+                
+                stopPolling();
+                document.getElementById('qr-container').style.display = 'none';
+            }
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
     function stopPolling() {
         if (pollingInterval) clearInterval(pollingInterval);
     }
 
     document.getElementById('clientModal').addEventListener('hidden.bs.modal', stopPolling);
+
+    // Identity validation debounce
+    let typingTimer;
+    const doneTypingInterval = 500;
+    const idInput = document.getElementById('clie-identidad');
+
+    idInput.addEventListener('keyup', () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(checkIdentity, doneTypingInterval);
+    });
+
+    idInput.addEventListener('keydown', () => {
+        clearTimeout(typingTimer);
+    });
+
+    function checkIdentity() {
+        const idVal = idInput.value.trim();
+        const feedback = document.getElementById('identidad-feedback');
+        const btnSave = document.getElementById('btn-save');
+        const currentId = document.getElementById('clie-id').value;
+
+        if (idVal.length < 5) {
+            feedback.innerHTML = '';
+            btnSave.disabled = false;
+            return;
+        }
+
+        const fd = new FormData();
+        fd.append('identidad', idVal);
+        if (currentId) fd.append('exclude_id', currentId);
+
+        fetch('controllers/ClientController.php?action=checkIdentity', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(res => {
+                if (res.exists) {
+                    feedback.innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle"></i> Este DNI ya está registrado a nombre de: ${res.nombre} (Estado: ${res.estado})</span>`;
+                    btnSave.disabled = true;
+                } else {
+                    feedback.innerHTML = `<span class="text-success"><i class="fas fa-check-circle"></i> Identidad disponible.</span>`;
+                    btnSave.disabled = false;
+                }
+            });
+    }
 </script>

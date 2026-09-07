@@ -32,7 +32,7 @@ class PlanController {
         $data = [
             'nombre_plan' => trim($_POST['nombre_plan'] ?? ''),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
-            'precio' => floatval($_POST['precio'] ?? 0),
+            'precio' => floatval(str_replace(',', '', $_POST['precio'] ?? '0')),
             'duracion_dias' => intval($_POST['duracion_dias'] ?? 0)
         ];
 
@@ -69,6 +69,12 @@ class PlanController {
         }
 
         $planModel = new Plan();
+
+        if ($state === 0 && $planModel->hasActiveMemberships($id)) {
+            echo json_encode(['success' => false, 'message' => 'No se puede desactivar el plan porque hay clientes con membresías activas o pendientes usándolo.']);
+            return;
+        }
+
         $success = $planModel->changeState($id, $state);
         $msg = $state === 1 ? 'Plan activado.' : 'Plan desactivado.';
         

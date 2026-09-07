@@ -51,7 +51,7 @@
                               </div>
                               <div class="col-md-4 mb-3">
                                   <label class="form-label text-muted small fw-bold">Cantidad (Meses)</label>
-                                  <input type="number" class="form-control" id="caja-plan-qty" value="1" min="1" step="1" onchange="calculateCajaTotal()">
+                                  <input type="number" class="form-control" id="caja-plan-qty" value="1" min="1" step="1" oninput="this.value = this.value.replace(/[^0-9]/g, ''); calculateCajaTotal()">
                               </div>
                           </div>
                       </div>
@@ -100,7 +100,7 @@
                       </div>
                       <div class="mb-3">
                           <label class="form-label text-muted small fw-bold">Monto (Lempiras)</label>
-                          <input type="number" class="form-control" placeholder="0.00" min="0" step="0.01">
+                          <input type="text" class="form-control" id="caja-egreso-monto" placeholder="0.00" oninput="formatCurrencyInput(this)">
                       </div>
                       <hr>
                       <button class="btn btn-danger w-100 btn-lg shadow-sm"><i class="fas fa-minus-circle"></i> Registrar Gasto</button>

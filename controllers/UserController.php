@@ -12,8 +12,10 @@ class UserController {
         }
 
         $userModel = new User();
-        $activeOnly = isset($_GET['active']) && $_GET['active'] === 'true';
-        $users = $userModel->listAll($activeOnly);
+        $stateFilter = $_GET['active'] ?? '1';
+        if ($stateFilter === 'true') $stateFilter = '1';
+        if ($stateFilter === 'false') $stateFilter = 'all';
+        $users = $userModel->listAll($stateFilter);
         echo json_encode(['success' => true, 'data' => $users]);
     }
 
@@ -36,6 +38,11 @@ class UserController {
 
         if (empty($username)) {
             echo json_encode(['success' => false, 'message' => 'El nombre de usuario es obligatorio.']);
+            return;
+        }
+
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+            echo json_encode(['success' => false, 'message' => 'El nombre de usuario solo puede contener letras, números y guiones bajos.']);
             return;
         }
 
