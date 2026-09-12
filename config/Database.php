@@ -1,9 +1,9 @@
 <?php
 class Database {
-    private $host = "170.80.140.2,6161";
+    private $host = "62.171.152.181";
     private $db_name = "ORION_GYM";
-    private $username = "orionsys";
-    private $password = "123";
+    private $username = "sa";
+    private $password = "SairtechDB_SuperSecurePassword2026!";
     public $conn;
 
     public function getConnection() {

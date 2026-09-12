@@ -7,7 +7,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Orion Gym - Portal de Clientes",
   description: "Portal exclusivo para visualizar progreso y rutinas.",
-  themeColor: "#0a0a0a",
+  manifest: "/manifest.json",
+};
+
+export const viewport = {
+  themeColor: "#ff8c00",
 };
 
 export default function RootLayout({
