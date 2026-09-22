@@ -168,7 +168,8 @@
 
     function loadMembresias() {
         const status = document.getElementById('filter-status').value;
-        fetch(`controllers/MembershipController.php?action=list&status=${status}`)
+        const noCache = new Date().getTime();
+        fetch(`controllers/MembershipController.php?action=list&status=${status}&_t=${noCache}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
