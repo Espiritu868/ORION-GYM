@@ -174,7 +174,16 @@
                 if (data.success) {
                     membresias = data.data;
                     renderMembresias();
+                } else {
+                    console.error("Error API:", data);
+                    const tbody = document.getElementById('membresias-tbody');
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error: ${data.message}</td></tr>`;
                 }
+            })
+            .catch(err => {
+                console.error("Error Fetch:", err);
+                const tbody = document.getElementById('membresias-tbody');
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error de conexión o parseo. Revisa la consola.</td></tr>`;
             });
     }
 
