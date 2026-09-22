@@ -194,7 +194,7 @@
 
         const filtered = membresias.filter(m => 
             m.nombre_completo.toLowerCase().includes(filter) || 
-            (m.identidad && m.identidad.toLowerCase().includes(filter))
+            (m.identidad && String(m.identidad).toLowerCase().includes(filter))
         );
 
         if (filtered.length === 0) {
