@@ -54,7 +54,7 @@ class CajaController {
         $idPlan = $_POST['id_plan'] ?? null;
         $cantidad = (int)($_POST['cantidad'] ?? 1);
         $idMembresia = !empty($_POST['id_membresia']) ? $_POST['id_membresia'] : null;
-        $estadoMemb = $_POST['estado_memb'] ?? null;
+        $estadoMemb = trim($_POST['estado_memb'] ?? '');
         
         $metodoPago = $_POST['metodo_pago'] ?? 'Efectivo';
         $banco = $_POST['banco'] ?? null;
