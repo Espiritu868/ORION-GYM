@@ -6,6 +6,9 @@
     <button class="nav-link fw-bold" id="inventario-tab" data-bs-toggle="tab" data-bs-target="#inventario" type="button" role="tab"><i class="fas fa-box-open me-2"></i> Inventario de Productos</button>
   </li>
   <li class="nav-item" role="presentation">
+    <button class="nav-link fw-bold" id="recibos-tab" data-bs-toggle="tab" data-bs-target="#recibos" type="button" role="tab"><i class="fas fa-receipt me-2"></i> Configuración de Recibos</button>
+  </li>
+  <li class="nav-item" role="presentation">
     <button class="nav-link fw-bold text-danger" id="inactividad-tab" data-bs-toggle="tab" data-bs-target="#inactividad" type="button" role="tab"><i class="fas fa-user-clock me-2"></i> Control de Inactividad</button>
   </li>
 </ul>
@@ -95,6 +98,150 @@
                       <?php else: ?>
                       <button class="btn btn-secondary btn-lg w-100" disabled>No autorizado</button>
                       <?php endif; ?>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Pestaña Configuración de Recibos -->
+  <div class="tab-pane fade" id="recibos" role="tabpanel">
+      <div class="row">
+          <div class="col-md-6">
+              <div class="card shadow-sm border-0 h-100">
+                  <div class="card-body">
+                      <h5 class="card-title text-primary mb-4"><i class="fas fa-cogs"></i> Datos del Recibo</h5>
+                      <form id="receipt-config-form">
+                          <div class="mb-3">
+                              <label class="form-label text-muted small fw-bold">Nombre del Establecimiento <span class="text-danger">*</span></label>
+                              <input type="text" class="form-control" id="receipt-name" name="gym_name" required oninput="updateReceiptPreview()">
+                          </div>
+                          
+                          <div class="row">
+                              <div class="col-md-8 mb-3">
+                                  <label class="form-label text-muted small fw-bold">RTN</label>
+                                  <input type="text" class="form-control" id="receipt-rtn" name="rtn" oninput="updateReceiptPreview()">
+                              </div>
+                              <div class="col-md-4 mb-3 d-flex align-items-end">
+                                  <div class="form-check form-switch mb-2">
+                                      <input class="form-check-input" type="checkbox" id="receipt-show-rtn" name="show_rtn" value="1" onchange="updateReceiptPreview()">
+                                      <label class="form-check-label small" for="receipt-show-rtn">Mostrar</label>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <div class="row">
+                              <div class="col-md-8 mb-3">
+                                  <label class="form-label text-muted small fw-bold">Número de Teléfono</label>
+                                  <input type="text" class="form-control" id="receipt-phone" name="phone" oninput="updateReceiptPreview()">
+                              </div>
+                              <div class="col-md-4 mb-3 d-flex align-items-end">
+                                  <div class="form-check form-switch mb-2">
+                                      <input class="form-check-input" type="checkbox" id="receipt-show-phone" name="show_phone" value="1" onchange="updateReceiptPreview()">
+                                      <label class="form-check-label small" for="receipt-show-phone">Mostrar</label>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <div class="row">
+                              <div class="col-md-8 mb-3">
+                                  <label class="form-label text-muted small fw-bold">Dirección</label>
+                                  <textarea class="form-control" id="receipt-address" name="address" rows="2" oninput="updateReceiptPreview()"></textarea>
+                              </div>
+                              <div class="col-md-4 mb-3 d-flex align-items-center">
+                                  <div class="form-check form-switch mt-3">
+                                      <input class="form-check-input" type="checkbox" id="receipt-show-address" name="show_address" value="1" onchange="updateReceiptPreview()">
+                                      <label class="form-check-label small" for="receipt-show-address">Mostrar</label>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <div class="row">
+                              <div class="col-md-8 mb-3">
+                                  <label class="form-label text-muted small fw-bold">Redes Sociales</label>
+                                  <input type="text" class="form-control" id="receipt-social" name="social" placeholder="Ej: FB: GymOrion | IG: @gymorion" oninput="updateReceiptPreview()">
+                              </div>
+                              <div class="col-md-4 mb-3 d-flex align-items-end">
+                                  <div class="form-check form-switch mb-2">
+                                      <input class="form-check-input" type="checkbox" id="receipt-show-social" name="show_social" value="1" onchange="updateReceiptPreview()">
+                                      <label class="form-check-label small" for="receipt-show-social">Mostrar</label>
+                                  </div>
+                              </div>
+                          </div>
+                          
+                          <div class="mb-4">
+                              <label class="form-label text-muted small fw-bold">Texto Pie de Recibo</label>
+                              <textarea class="form-control" id="receipt-footer" name="footer" rows="2" placeholder="Ej: ¡Gracias por tu preferencia!" oninput="updateReceiptPreview()"></textarea>
+                          </div>
+                          <?php if(hasPerm('administracion_edit')): ?>
+                          <button type="submit" class="btn btn-primary w-100"><i class="fas fa-save"></i> Guardar Configuración</button>
+                          <?php else: ?>
+                          <button type="button" class="btn btn-secondary w-100" disabled>No autorizado</button>
+                          <?php endif; ?>
+                      </form>
+                  </div>
+              </div>
+          </div>
+          <div class="col-md-6">
+              <div class="card shadow-sm border-0 h-100 bg-light">
+                  <div class="card-body d-flex flex-column align-items-center">
+                      <div class="d-flex justify-content-between w-100 mb-4 align-items-center">
+                          <h5 class="text-muted mb-0">Vista Previa</h5>
+                          <select class="form-select form-select-sm w-auto" id="preview-type" onchange="updateReceiptPreview()">
+                              <option value="membresia">Pago Mensualidad</option>
+                              <option value="producto">Venta Producto</option>
+                              <option value="ingreso">Otro Ingreso</option>
+                          </select>
+                      </div>
+                      
+                      <!-- Ticket Preview -->
+                      <div class="bg-white p-4 shadow-sm my-3" style="width: 340px; min-height: 400px; font-family: monospace; color: #333; border: 1px dashed #ccc; box-shadow: 0 10px 25px rgba(0,0,0,0.05) !important;">
+                          <div class="text-center mb-4">
+                              <h4 class="fw-bold mb-1" id="preview-name" style="text-transform: uppercase;">ORION GYM</h4>
+                              <div style="font-size: 0.9em;" id="preview-rtn-container">RTN: <span id="preview-rtn">0000-0000-000000</span></div>
+                              <div style="font-size: 0.9em;" id="preview-address">Dirección del Gym</div>
+                              <div style="font-size: 0.9em;" id="preview-phone-container">Tel: <span id="preview-phone">0000-0000</span></div>
+                              <div style="font-size: 0.9em;" id="preview-social">@redsocial</div>
+                          </div>
+                          
+                          <div class="py-3 mb-4 text-center" style="border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc;">
+                              <div class="fw-bold" id="preview-title">RECIBO DE PAGO #0001</div>
+                              <div id="preview-date">Fecha: <?php echo date('d/m/Y H:i'); ?></div>
+                              <div id="preview-cashier" style="font-size: 0.9em;">Le atendió: Admin</div>
+                              <div id="preview-client-line" class="mt-2 fw-bold" style="font-size: 0.9em;">Cliente: Consumidor Final</div>
+                          </div>
+                          
+                          <div class="mb-4" style="font-size: 0.9em;" id="preview-body">
+                              <!-- Dynamic content depending on receipt type -->
+                          </div>
+                          
+                          <div class="pt-3 pb-1 mb-5" style="border-top: 1px dashed #ccc; font-size: 1em;">
+                              <div class="d-flex justify-content-between text-muted mb-1" style="font-size: 0.9em;" id="preview-subtotal-line">
+                                  <span>SUBTOTAL:</span>
+                                  <span id="preview-subtotal">L 434.78</span>
+                              </div>
+                              <div class="d-flex justify-content-between text-muted mb-2" style="font-size: 0.9em;" id="preview-tax-line">
+                                  <span>I.S.V. (15%):</span>
+                                  <span id="preview-tax">L 65.22</span>
+                              </div>
+                              <div class="d-flex justify-content-between fw-bold mb-2" style="font-size: 1.2em;">
+                                  <span>TOTAL:</span>
+                                  <span id="preview-total">L 500.00</span>
+                              </div>
+                              <div class="d-flex justify-content-between text-muted" style="font-size: 0.85em;">
+                                  <span>MÉTODO:</span>
+                                  <span id="preview-method">Efectivo</span>
+                              </div>
+                              <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 0.85em; display: none !important;" id="preview-ref-line">
+                                  <span>REFERENCIA:</span>
+                                  <span id="preview-ref">123456789</span>
+                              </div>
+                          </div>
+                          
+                          <div class="text-center mt-auto" style="font-size: 0.85em;">
+                              <div id="preview-footer">¡Gracias por su preferencia!</div>
+                          </div>
+                      </div>
                   </div>
               </div>
           </div>
@@ -266,6 +413,9 @@
         
         loadPlanes();
         loadProductos();
+        loadReceiptConfig();
+        
+        updateReceiptPreview();
 
         document.getElementById('search-product').addEventListener('input', renderProductos);
     });
@@ -576,4 +726,149 @@
             }
         });
     });
+
+    // --- CONFIGURACIÓN DE RECIBOS ---
+    function loadReceiptConfig() {
+        fetch('controllers/ConfigController.php?action=getReceiptConfig')
+            .then(r => r.json())
+            .then(res => {
+                if(res.success && res.data) {
+                    document.getElementById('receipt-name').value = res.data.gym_name || '';
+                    document.getElementById('receipt-rtn').value = res.data.rtn || '';
+                    document.getElementById('receipt-show-rtn').checked = res.data.show_rtn;
+                    
+                    document.getElementById('receipt-phone').value = res.data.phone || '';
+                    document.getElementById('receipt-show-phone').checked = res.data.show_phone;
+                    
+                    document.getElementById('receipt-address').value = res.data.address || '';
+                    document.getElementById('receipt-show-address').checked = res.data.show_address;
+                    
+                    document.getElementById('receipt-social').value = res.data.social || '';
+                    document.getElementById('receipt-show-social').checked = res.data.show_social;
+                    
+                    document.getElementById('receipt-footer').value = res.data.footer || '';
+                }
+                updateReceiptPreview();
+            });
+    }
+
+    function updateReceiptPreview() {
+        const name = document.getElementById('receipt-name').value;
+        const rtn = document.getElementById('receipt-rtn').value;
+        const showRtn = document.getElementById('receipt-show-rtn').checked;
+        
+        const phone = document.getElementById('receipt-phone').value;
+        const showPhone = document.getElementById('receipt-show-phone').checked;
+        
+        const address = document.getElementById('receipt-address').value;
+        const showAddress = document.getElementById('receipt-show-address').checked;
+        
+        const social = document.getElementById('receipt-social').value;
+        const showSocial = document.getElementById('receipt-show-social').checked;
+        
+        const footer = document.getElementById('receipt-footer').value;
+
+        // Header
+        document.getElementById('preview-name').textContent = name || 'NOMBRE GYM';
+        
+        document.getElementById('preview-rtn').textContent = rtn;
+        document.getElementById('preview-rtn-container').style.display = (showRtn && rtn) ? 'block' : 'none';
+        
+        document.getElementById('preview-address').textContent = address;
+        document.getElementById('preview-address').style.display = (showAddress && address) ? 'block' : 'none';
+        
+        document.getElementById('preview-phone').textContent = phone;
+        document.getElementById('preview-phone-container').style.display = (showPhone && phone) ? 'block' : 'none';
+        
+        document.getElementById('preview-social').textContent = social;
+        document.getElementById('preview-social').style.display = (showSocial && social) ? 'block' : 'none';
+        
+        document.getElementById('preview-footer').textContent = footer;
+        document.getElementById('preview-footer').style.display = footer ? 'block' : 'none';
+
+        // Body Content based on selector
+        const type = document.getElementById('preview-type').value;
+        const bodyEl = document.getElementById('preview-body');
+        
+        if (type === 'membresia') {
+            document.getElementById('preview-title').textContent = 'RECIBO DE PAGO #0001';
+            document.getElementById('preview-client-line').textContent = 'Cliente: Juan Pérez';
+            document.getElementById('preview-client-line').style.display = 'block';
+            
+            document.getElementById('preview-subtotal').textContent = 'L 521.74';
+            document.getElementById('preview-tax').textContent = 'L 78.26';
+            document.getElementById('preview-total').textContent = 'L 600.00';
+            document.getElementById('preview-method').textContent = 'Efectivo';
+            document.getElementById('preview-ref-line').style.setProperty('display', 'none', 'important');
+            
+            bodyEl.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>1x Plan Anual (1 Meses)</span>
+                    <span>L 600.00</span>
+                </div>
+            `;
+        } else if (type === 'producto') {
+            document.getElementById('preview-title').textContent = 'VENTA MOSTRADOR #0002';
+            document.getElementById('preview-client-line').textContent = 'Cliente: Consumidor Final';
+            document.getElementById('preview-client-line').style.display = 'block';
+            
+            document.getElementById('preview-subtotal').textContent = 'L 730.43';
+            document.getElementById('preview-tax').textContent = 'L 109.57';
+            document.getElementById('preview-total').textContent = 'L 840.00';
+            document.getElementById('preview-method').textContent = 'Tarjeta';
+            document.getElementById('preview-ref-line').style.setProperty('display', 'flex', 'important');
+            
+            bodyEl.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>2x Bote con Agua</span>
+                    <span>L 40.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>1x Proteína Whey 1lb</span>
+                    <span>L 800.00</span>
+                </div>
+            `;
+        } else if (type === 'ingreso') {
+            document.getElementById('preview-title').textContent = 'RECIBO DE INGRESO #0003';
+            document.getElementById('preview-client-line').style.display = 'none';
+            
+            document.getElementById('preview-subtotal').textContent = 'L 130.43';
+            document.getElementById('preview-tax').textContent = 'L 19.57';
+            document.getElementById('preview-total').textContent = 'L 150.00';
+            document.getElementById('preview-method').textContent = 'Transferencia';
+            document.getElementById('preview-ref-line').style.setProperty('display', 'flex', 'important');
+            
+            bodyEl.innerHTML = `
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Multa reposición llave</span>
+                    <span>L 150.00</span>
+                </div>
+            `;
+        }
+    }
+
+    const receiptForm = document.getElementById('receipt-config-form');
+    if (receiptForm) {
+        receiptForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch('controllers/ConfigController.php?action=saveReceiptConfig', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(r => r.json()).then(res => {
+                if(res.success) {
+                    Swal.fire({
+                        title: '¡Guardado!',
+                        text: 'La configuración de recibos se ha actualizado.',
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                } else {
+                    Swal.fire('Error', res.message, 'error');
+                }
+            });
+        });
+    }
 </script>

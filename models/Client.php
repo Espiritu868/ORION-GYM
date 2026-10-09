@@ -14,7 +14,9 @@ class Client {
                 CASE WHEN DATALENGTH(fotografia) > 0 THEN 1 ELSE 0 END AS tiene_foto 
                 FROM CLIENTES";
         if ($stateFilter === '1' || $stateFilter === '0') {
-            $sql .= " WHERE estado = " . intval($stateFilter);
+            $sql .= " WHERE estado = " . intval($stateFilter) . " AND email != 'consumidor_final@orion.com'";
+        } else {
+            $sql .= " WHERE email != 'consumidor_final@orion.com'";
         }
         $sql .= " ORDER BY estado DESC, nombre_completo ASC";
         
