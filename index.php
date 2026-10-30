@@ -29,6 +29,10 @@ $page = $_GET['page'] ?? 'dashboard';
                             'caja' => 'Control de Caja',
                             'usuarios' => 'Gestión de Usuarios',
                             'administracion' => 'Configuración',
+                            'asistencia' => 'Control de Acceso',
+                            'reportes' => 'Reportes Administrativos',
+                            'progreso_cliente' => 'Progreso del Cliente',
+                            'rutinas_cliente' => 'Rutinas del Cliente',
                             default => 'Módulo'
                         };
                     ?>
@@ -41,7 +45,10 @@ $page = $_GET['page'] ?? 'dashboard';
         
         <div class="content">
             <?php 
-            $allowed_pages = ['dashboard', 'clientes', 'membresias', 'caja', 'usuarios', 'administracion', 'asistencia', 'reportes'];
+            $allowed_pages = [
+                'dashboard', 'clientes', 'membresias', 'caja', 'usuarios', 
+                'administracion', 'asistencia', 'reportes', 'progreso_cliente', 'rutinas_cliente'
+            ];
             if (in_array($page, $allowed_pages)) {
                 $access = true;
                 if ($page == 'dashboard' && !hasPerm('dashboard_view')) $access = false;
@@ -52,6 +59,7 @@ $page = $_GET['page'] ?? 'dashboard';
                 if ($page == 'administracion' && !hasPerm('administracion_view')) $access = false;
                 if ($page == 'asistencia' && !hasPerm('asistencia_view')) $access = false;
                 if ($page == 'reportes' && !hasPerm('reportes_view')) $access = false;
+                if (($page == 'progreso_cliente' || $page == 'rutinas_cliente') && !hasPerm('clientes_view')) $access = false;
 
                 if ($access) {
                     if (file_exists("pages/{$page}.php")) {

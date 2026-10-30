@@ -168,13 +168,23 @@
 
     function loadMembresias() {
         const status = document.getElementById('filter-status').value;
-        fetch(`controllers/MembershipController.php?action=list&status=${status}`)
+        const noCache = new Date().getTime();
+        fetch(`controllers/MembershipController.php?action=list&status=${status}&_t=${noCache}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     membresias = data.data;
                     renderMembresias();
+                } else {
+                    console.error("Error API:", data);
+                    const tbody = document.getElementById('membresias-tbody');
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error: ${data.message}</td></tr>`;
                 }
+            })
+            .catch(err => {
+                console.error("Error Fetch:", err);
+                const tbody = document.getElementById('membresias-tbody');
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Error de conexión o parseo. Revisa la consola.</td></tr>`;
             });
     }
 
@@ -185,7 +195,7 @@
 
         const filtered = membresias.filter(m => 
             m.nombre_completo.toLowerCase().includes(filter) || 
-            (m.identidad && m.identidad.toLowerCase().includes(filter))
+            (m.identidad && String(m.identidad).toLowerCase().includes(filter))
         );
 
         if (filtered.length === 0) {

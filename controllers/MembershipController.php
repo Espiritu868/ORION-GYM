@@ -20,6 +20,12 @@ class MembershipController {
         // Calculate days left for UI
         $today = new DateTime();
         foreach ($membresias as &$m) {
+            $m['estado_membresia'] = trim($m['estado_membresia']);
+            if (empty($m['fecha_fin'])) {
+                $m['dias_restantes'] = 0;
+                $m['estado_ui'] = $m['estado_membresia'];
+                continue;
+            }
             $endDate = new DateTime($m['fecha_fin']);
             $diff = $today->diff($endDate);
             $m['dias_restantes'] = (int)$diff->format('%R%a'); // e.g. +13 or -5

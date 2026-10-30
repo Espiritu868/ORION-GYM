@@ -27,7 +27,7 @@ class Membership {
                 JOIN PLANES p ON m.id_plan = p.id_plan ";
         
         if ($filterStatus === 'activas') {
-            $sql .= " WHERE m.estado_membresia = 'Activa' ";
+            $sql .= " WHERE m.estado_membresia IN ('Activa', 'Pendiente') ";
         } else if ($filterStatus === 'vencidas') {
             $sql .= " WHERE m.estado_membresia = 'Vencida' OR (m.estado_membresia = 'Activa' AND m.fecha_fin BETWEEN CAST(GETDATE() AS DATE) AND DATEADD(day, 3, CAST(GETDATE() AS DATE))) ";
         } else if ($filterStatus === 'canceladas') {

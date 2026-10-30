@@ -8,7 +8,7 @@ class Caja {
         $this->db = (new Database())->getConnection();
     }
 
-    public function listClientsForPayment() {
+    public function listClientsForPayment($concepto = 'mensualidad') {
         // Query to get all clients with their most recent membership status
         // Prioritize Active, then Pending, then Vencida.
         $sql = "
@@ -24,9 +24,13 @@ class Caja {
                 GROUP BY id_cliente
             ) latest ON c.id_cliente = latest.id_cliente
             LEFT JOIN MEMBRESIAS m ON latest.max_id = m.id_membresia
-            WHERE c.estado = 1
-            ORDER BY c.nombre_completo ASC
-        ";
+            WHERE c.estado = 1";
+            
+        if ($concepto === 'mensualidad') {
+            $sql .= " AND c.email != 'consumidor_final@orion.com'";
+        }
+        
+        $sql .= " ORDER BY CASE WHEN c.email = 'consumidor_final@orion.com' THEN 0 ELSE 1 END, c.nombre_completo ASC";
 
         try {
             $stmt = $this->db->query($sql);
@@ -35,6 +39,11 @@ class Caja {
             error_log("Error in listClientsForPayment: " . $e->getMessage());
             return [];
         }
+    }
+
+    public function getConsumidorFinalData() {
+        $stmt = $this->db->query("SELECT id_cliente, nombre_completo AS nombre FROM CLIENTES WHERE email = 'consumidor_final@orion.com'");
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function processMembershipPayment($idCliente, $idPlan, $cantidad, $idMembresia, $estadoMemb, $idUsuario, $metodoPago = 'Efectivo', $banco = null, $referencia = null) {
@@ -135,6 +144,108 @@ class Caja {
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log("Error processing payment: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error BD: ' . $e->getMessage()];
+        }
+    }
+    public function processEgreso($concepto, $monto, $idUsuario, $metodoPago = 'Efectivo', $banco = null, $referencia = null) {
+        try {
+            $sql = "INSERT INTO CAJA_TRANSACCIONES (tipo_transaccion, concepto, monto, fecha_transaccion, id_usuario, metodo_pago, banco, referencia) 
+                    VALUES ('Egreso', ?, ?, GETDATE(), ?, ?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$concepto, $monto, $idUsuario, $metodoPago, $banco, $referencia]);
+            return ['success' => true];
+        } catch (Exception $e) {
+            error_log("Error processing egreso: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Error BD: ' . $e->getMessage()];
+        }
+    }
+
+    public function processProductSale($cart, $idUsuario, $metodoPago, $banco, $referencia) {
+        try {
+            $this->db->beginTransaction();
+
+            $totalVenta = 0;
+            $itemsNombres = [];
+
+            foreach ($cart as $item) {
+                $idProducto = $item['id'];
+                $qty = (int)$item['qty'];
+                
+                if ($qty <= 0) continue;
+
+                $stmtP = $this->db->prepare("SELECT nombre_producto, precio_venta, stock FROM PRODUCTOS WHERE id_producto = ?");
+                $stmtP->execute([$idProducto]);
+                $producto = $stmtP->fetch(PDO::FETCH_ASSOC);
+
+                if (!$producto) throw new Exception("Producto ID $idProducto no existe.");
+                if ($producto['stock'] < $qty) throw new Exception("Stock insuficiente para: " . $producto['nombre_producto']);
+
+                $subtotal = $producto['precio_venta'] * $qty;
+                $totalVenta += $subtotal;
+                $itemsNombres[] = $qty . "x " . $producto['nombre_producto'];
+
+                $stmtUpd = $this->db->prepare("UPDATE PRODUCTOS SET stock = stock - ? WHERE id_producto = ?");
+                $stmtUpd->execute([$qty, $idProducto]);
+
+                $sqlK = "INSERT INTO KARDEX_INVENTARIO (id_producto, tipo_movimiento, cantidad, precio, descripcion, id_usuario)
+                         VALUES (?, 'VENTA', ?, ?, 'Venta en mostrador', ?)";
+                $stmtK = $this->db->prepare($sqlK);
+                $stmtK->execute([$idProducto, $qty, $producto['precio_venta'], $idUsuario]);
+            }
+
+            if ($totalVenta <= 0) throw new Exception("El monto total es 0.");
+
+            $conceptoStr = "Venta: " . implode(', ', $itemsNombres);
+            if (strlen($conceptoStr) > 250) {
+                $conceptoStr = substr($conceptoStr, 0, 247) . "...";
+            }
+
+            $sqlVenta = "INSERT INTO VENTAS (fecha_venta, total, id_usuario, metodo_pago, banco, referencia) 
+                         VALUES (GETDATE(), ?, ?, ?, ?, ?)";
+            $stmtVenta = $this->db->prepare($sqlVenta);
+            $stmtVenta->execute([$totalVenta, $idUsuario, $metodoPago, $banco, $referencia]);
+
+            $sqlCaja = "INSERT INTO CAJA_TRANSACCIONES (tipo_transaccion, concepto, monto, fecha_transaccion, id_usuario, metodo_pago, banco, referencia) 
+                        VALUES ('Ingreso', ?, ?, GETDATE(), ?, ?, ?, ?)";
+            $stmtCaja = $this->db->prepare($sqlCaja);
+            $stmtCaja->execute([$conceptoStr, $totalVenta, $idUsuario, $metodoPago, $banco, $referencia]);
+
+            $this->db->commit();
+            return ['success' => true];
+
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error processing product sale: " . $e->getMessage());
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    public function processOtroIngreso($concepto, $monto, $idUsuario, $metodoPago, $banco, $referencia) {
+        try {
+            $this->db->beginTransaction();
+
+            $conceptoFinal = "Otros Ingresos: " . $concepto;
+            if (strlen($conceptoFinal) > 250) {
+                $conceptoFinal = substr($conceptoFinal, 0, 247) . "...";
+            }
+
+            // Also register in VENTAS to keep income unified
+            $sqlVenta = "INSERT INTO VENTAS (fecha_venta, total, id_usuario, metodo_pago, banco, referencia) 
+                         VALUES (GETDATE(), ?, ?, ?, ?, ?)";
+            $stmtVenta = $this->db->prepare($sqlVenta);
+            $stmtVenta->execute([$monto, $idUsuario, $metodoPago, $banco, $referencia]);
+
+            // Register in CAJA_TRANSACCIONES
+            $sqlCaja = "INSERT INTO CAJA_TRANSACCIONES (tipo_transaccion, concepto, monto, fecha_transaccion, id_usuario, metodo_pago, banco, referencia) 
+                        VALUES ('Ingreso', ?, ?, GETDATE(), ?, ?, ?, ?)";
+            $stmtCaja = $this->db->prepare($sqlCaja);
+            $stmtCaja->execute([$conceptoFinal, $monto, $idUsuario, $metodoPago, $banco, $referencia]);
+
+            $this->db->commit();
+            return ['success' => true];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("Error processing otro ingreso: " . $e->getMessage());
             return ['success' => false, 'message' => 'Error BD: ' . $e->getMessage()];
         }
     }
