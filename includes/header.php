@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- IMask for input formatting -->
+    <script src="https://unpkg.com/imask"></script>
     <style>
         body { background: #f8fafc; color: #333; font-family: 'Outfit'; overflow-x: hidden; }
         
@@ -18,16 +20,17 @@
             min-height: 100vh; 
             background: #0f172a; 
             color: white; 
-            padding: 20px;
+            padding: 20px 15px;
             width: 250px;
             position: fixed;
             left: 0;
             top: 0;
             z-index: 1040;
             transition: all 0.3s ease;
+            overflow-x: hidden;
         }
         .sidebar.collapsed {
-            left: -250px;
+            width: 80px;
         }
         
         #main-content {
@@ -37,12 +40,12 @@
             min-height: 100vh;
         }
         #main-content.expanded {
-            margin-left: 0;
-            width: 100%;
+            margin-left: 80px;
+            width: calc(100% - 80px);
         }
 
         @media (max-width: 768px) {
-            .sidebar { left: -250px; }
+            .sidebar { left: -250px; width: 250px !important; }
             .sidebar.show { left: 0; }
             #main-content { margin-left: 0; width: 100%; }
             #main-content.expanded { margin-left: 0; width: 100%; }
@@ -56,19 +59,25 @@
         }
         body.sidebar-collapsed .modal,
         body.sidebar-collapsed .modal-backdrop {
-            left: 0 !important;
-            width: 100% !important;
+            left: 80px !important;
+            width: calc(100% - 80px) !important;
         }
         @media (max-width: 768px) {
             body:not(.sidebar-collapsed) .modal,
-            body:not(.sidebar-collapsed) .modal-backdrop { 
+            body:not(.sidebar-collapsed) .modal-backdrop,
+            body.sidebar-collapsed .modal,
+            body.sidebar-collapsed .modal-backdrop { 
                 left: 0 !important; 
                 width: 100% !important; 
             }
         }
 
-        .sidebar a { color: #cbd5e1; text-decoration: none; display: block; padding: 10px; border-radius: 5px; margin-bottom: 5px;}
+        .sidebar a { color: #cbd5e1; text-decoration: none; display: flex; align-items: center; padding: 12px 10px; border-radius: 5px; margin-bottom: 5px; white-space: nowrap; }
         .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; }
+        .sidebar i { width: 25px; text-align: center; }
+        .sidebar.collapsed .sidebar-text, .sidebar.collapsed h4 { display: none; }
+        .sidebar.collapsed a { justify-content: center; }
+        .sidebar.collapsed i { margin-right: 0 !important; font-size: 1.2rem; }
         .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;}
         .content { padding: 30px; }
         .table-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }

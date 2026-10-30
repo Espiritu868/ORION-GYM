@@ -17,9 +17,6 @@ $page = $_GET['page'] ?? 'dashboard';
     <div id="main-content">
         <div class="topbar">
             <div class="d-flex align-items-center">
-                <button class="btn btn-light me-3 d-none d-md-block" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
                 <button class="btn btn-light me-3 d-md-none" id="sidebarToggleMobile">
                     <i class="fas fa-bars"></i>
                 </button>
@@ -44,7 +41,7 @@ $page = $_GET['page'] ?? 'dashboard';
         
         <div class="content">
             <?php 
-            $allowed_pages = ['dashboard', 'clientes', 'membresias', 'caja', 'usuarios', 'administracion'];
+            $allowed_pages = ['dashboard', 'clientes', 'membresias', 'caja', 'usuarios', 'administracion', 'asistencia', 'reportes'];
             if (in_array($page, $allowed_pages)) {
                 $access = true;
                 if ($page == 'dashboard' && !hasPerm('dashboard_view')) $access = false;
@@ -53,6 +50,8 @@ $page = $_GET['page'] ?? 'dashboard';
                 if ($page == 'caja' && !hasPerm('caja_view')) $access = false;
                 if ($page == 'usuarios' && !hasPerm('usuarios_view')) $access = false;
                 if ($page == 'administracion' && !hasPerm('administracion_view')) $access = false;
+                if ($page == 'asistencia' && !hasPerm('asistencia_view')) $access = false;
+                if ($page == 'reportes' && !hasPerm('reportes_view')) $access = false;
 
                 if ($access) {
                     if (file_exists("pages/{$page}.php")) {

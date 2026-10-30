@@ -89,6 +89,13 @@
                               <td><input type="checkbox" class="form-check-input perm-checkbox" value="caja_delete"></td>
                           </tr>
                           <tr>
+                              <td class="text-start">Asistencia</td>
+                              <td><input type="checkbox" class="form-check-input perm-checkbox" value="asistencia_view"></td>
+                              <td><input type="checkbox" class="form-check-input perm-checkbox" value="asistencia_create"></td>
+                              <td class="text-muted text-center">-</td>
+                              <td class="text-muted text-center">-</td>
+                          </tr>
+                          <tr>
                               <td class="text-start">Configuración</td>
                               <td><input type="checkbox" class="form-check-input perm-checkbox" value="administracion_view"></td>
                               <td><input type="checkbox" class="form-check-input perm-checkbox" value="administracion_create"></td>

@@ -240,6 +240,59 @@ class ClientController {
             echo json_encode(['exists' => false]);
         }
     }
+
+    public function profile() {
+        if (!hasPerm('clientes_view')) {
+            echo json_encode(['success' => false, 'message' => 'No autorizado']);
+            return;
+        }
+
+        $id = intval($_GET['id_cliente'] ?? 0);
+        if (!$id) {
+            echo json_encode(['success' => false, 'message' => 'ID requerido']);
+            return;
+        }
+
+        $database = new Database();
+        $db = $database->getConnection();
+
+        // 1. Membresias
+        $stmtM = $db->prepare("
+            SELECT m.*, p.nombre_plan, p.precio 
+            FROM MEMBRESIAS m 
+            JOIN PLANES p ON m.id_plan = p.id_plan 
+            WHERE m.id_cliente = ? 
+            ORDER BY m.fecha_inicio DESC
+        ");
+        $stmtM->execute([$id]);
+        $membresias = $stmtM->fetchAll(PDO::FETCH_ASSOC);
+
+        // 2. Pagos (Ventas e ingresos por membresia)
+        $stmtV = $db->prepare("
+            SELECT id_venta as id, fecha_venta as fecha, 'Compra de Productos' as concepto, total as monto, 'Ingreso' as tipo
+            FROM VENTAS WHERE id_cliente = ? 
+            UNION ALL
+            SELECT t.id_transaccion as id, t.fecha_transaccion as fecha, t.concepto, t.monto, t.tipo_transaccion as tipo
+            FROM CAJA_TRANSACCIONES t
+            JOIN MEMBRESIAS m ON t.id_membresia = m.id_membresia
+            WHERE m.id_cliente = ?
+            ORDER BY fecha DESC
+        ");
+        $stmtV->execute([$id, $id]);
+        $pagos = $stmtV->fetchAll(PDO::FETCH_ASSOC);
+
+        // 3. Asistencia
+        $stmtA = $db->prepare("SELECT fecha_hora FROM ASISTENCIA WHERE id_cliente = ? ORDER BY fecha_hora DESC");
+        $stmtA->execute([$id]);
+        $asistencias = $stmtA->fetchAll(PDO::FETCH_ASSOC);
+
+        echo json_encode([
+            'success' => true,
+            'membresias' => $membresias,
+            'pagos' => $pagos,
+            'asistencias' => $asistencias
+        ]);
+    }
 }
 
 // Router

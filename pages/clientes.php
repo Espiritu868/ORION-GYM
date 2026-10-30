@@ -15,6 +15,7 @@
     <table class="table table-hover align-middle">
         <thead class="table-light">
             <tr>
+                <th style="width: 80px;">ID Bio</th>
                 <th>Foto</th>
                 <th>Identidad</th>
                 <th>Nombre Completo</th>
@@ -98,13 +99,123 @@
 </div>
 
 
+<!-- Modal Perfil -->
+<div class="modal fade" id="profileModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title"><i class="fas fa-folder-open"></i> Expediente del Cliente: <span id="profile-name"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+          <ul class="nav nav-tabs px-3 pt-3 bg-light" id="profileTabs" role="tablist">
+            <li class="nav-item"><button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#prof-membresias">Historial Membresías</button></li>
+            <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#prof-pagos">Pagos Registrados</button></li>
+            <li class="nav-item"><button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#prof-asistencia">Registro Asistencia</button></li>
+          </ul>
+          
+          <div class="tab-content p-4" style="min-height: 400px; max-height: 60vh; overflow-y: auto;">
+              <!-- Membresías -->
+              <div class="tab-pane fade show active" id="prof-membresias">
+                  <div id="prof-membresias-content">Cargando...</div>
+              </div>
+              
+              <!-- Pagos -->
+              <div class="tab-pane fade" id="prof-pagos">
+                  <div id="prof-pagos-content">Cargando...</div>
+              </div>
+              
+              <!-- Asistencia -->
+              <div class="tab-pane fade" id="prof-asistencia">
+                  <div id="prof-asistencia-content">Cargando...</div>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+    let profileModalInstance;
+    document.addEventListener('DOMContentLoaded', () => {
+        profileModalInstance = new bootstrap.Modal(document.getElementById('profileModal'));
+    });
+
+    function viewProfile(id_cliente, nombre) {
+        document.getElementById('profile-name').textContent = nombre;
+        document.getElementById('prof-membresias-content').innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+        document.getElementById('prof-pagos-content').innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+        document.getElementById('prof-asistencia-content').innerHTML = '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
+        
+        profileModalInstance.show();
+
+        fetch(`controllers/ClientController.php?action=profile&id_cliente=${id_cliente}`)
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    renderMembresias(res.membresias);
+                    renderPagos(res.pagos);
+                    renderAsistencia(res.asistencias);
+                } else {
+                    document.getElementById('prof-membresias-content').innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
+                }
+            });
+    }
+
+    function renderMembresias(arr) {
+        if(!arr.length) return document.getElementById('prof-membresias-content').innerHTML = '<p class="text-muted">No hay historial de membresías.</p>';
+        let html = '<table class="table table-bordered"><thead><tr><th>Plan</th><th>Fechas</th><th>Estado</th></tr></thead><tbody>';
+        arr.forEach(m => {
+            html += `<tr>
+                <td>${m.nombre_plan} <br><small class="text-muted">Precio Base: L ${m.precio}</small></td>
+                <td>Inicio: ${m.fecha_inicio} <br> Fin: ${m.fecha_fin}</td>
+                <td><span class="badge bg-${m.estado_membresia === 'Activa' ? 'success' : (m.estado_membresia === 'Vencida' ? 'danger' : 'secondary')}">${m.estado_membresia}</span></td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('prof-membresias-content').innerHTML = html;
+    }
+
+    function renderPagos(arr) {
+        if(!arr.length) return document.getElementById('prof-pagos-content').innerHTML = '<p class="text-muted">No hay pagos registrados.</p>';
+        let html = '<table class="table table-bordered"><thead><tr><th>Fecha</th><th>Concepto</th><th>Monto</th></tr></thead><tbody>';
+        arr.forEach(p => {
+            html += `<tr>
+                <td>${p.fecha}</td>
+                <td>${p.concepto}</td>
+                <td class="text-success fw-bold">+ L ${p.monto}</td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('prof-pagos-content').innerHTML = html;
+    }
+
+    function renderAsistencia(arr) {
+        if(!arr.length) return document.getElementById('prof-asistencia-content').innerHTML = '<p class="text-muted">No hay registros de asistencia.</p>';
+        let html = '<div class="row">';
+        arr.forEach(a => {
+            html += `<div class="col-md-3 col-6 mb-3">
+                <div class="card bg-light border-0 shadow-sm text-center p-3">
+                    <i class="fas fa-check-circle text-success fs-3 mb-2"></i>
+                    <small class="fw-bold">${a.fecha_hora}</small>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+        document.getElementById('prof-asistencia-content').innerHTML = html;
+    }
     let clients = [];
     let pollingInterval = null;
     let modal;
+    let maskDni, maskTelefono;
 
     document.addEventListener('DOMContentLoaded', () => {
         modal = new bootstrap.Modal(document.getElementById('clientModal'));
+        
+        // Initialize masks
+        maskDni = IMask(document.getElementById('clie-identidad'), { mask: '0000-0000-00000' });
+        maskTelefono = IMask(document.getElementById('clie-telefono'), { mask: '0000-0000' });
+
         loadClients();
         document.getElementById('filter-status').addEventListener('change', loadClients);
         document.getElementById('search').addEventListener('input', renderTable);
@@ -133,7 +244,7 @@
         );
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No se encontraron miembros.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No se encontraron miembros.</td></tr>`;
             return;
         }
 
@@ -157,18 +268,32 @@
             
             <?php if(hasPerm('clientes_delete')): ?>
             if (isActive) {
-                btns += `<button class="btn btn-sm btn-danger" onclick="changeState(${c.id_cliente}, 'deactivate')"><i class="fas fa-user-slash"></i></button>`;
+                btns += `<button class="btn btn-sm btn-danger me-1" title="Dar de baja" onclick="changeState(${c.id_cliente}, 'deactivate')"><i class="fas fa-user-slash"></i></button>`;
             } else {
-                btns += `<button class="btn btn-sm btn-success" onclick="changeState(${c.id_cliente}, 'activate')"><i class="fas fa-check"></i></button>`;
+                btns += `<button class="btn btn-sm btn-success me-1" title="Reactivar" onclick="changeState(${c.id_cliente}, 'activate')"><i class="fas fa-check"></i></button>`;
             }
             <?php endif; ?>
+            
+            // Add Profile button
+            btns += `<button class="btn btn-sm btn-secondary" title="Ver Expediente" onclick="viewProfile(${c.id_cliente}, '${c.nombre_completo.replace(/'/g, "\\'")}')"><i class="fas fa-id-badge"></i></button>`;
+
+            let displayDni = (c.identidad || '-').replace(/[^0-9]/g, '');
+            if (displayDni.length === 13) {
+                displayDni = displayDni.replace(/(\d{4})(\d{4})(\d{5})/, '$1-$2-$3');
+            } else if (!displayDni) { displayDni = '-'; } else { displayDni = c.identidad; }
+
+            let displayTel = (c.telefono || '-').replace(/[^0-9]/g, '');
+            if (displayTel.length === 8) {
+                displayTel = displayTel.replace(/(\d{4})(\d{4})/, '$1-$2');
+            } else if (!displayTel) { displayTel = '-'; } else { displayTel = c.telefono; }
 
             tbody.insertAdjacentHTML('beforeend', `
                 <tr>
-                    <td>${imgTag}</td>
-                    <td>${c.identidad || '-'}</td>
+                    <td><span class="badge bg-dark fs-6">#${c.id_cliente}</span></td>
+                <td>${imgTag}</td>
+                    <td>${displayDni}</td>
                     <td class="fw-bold">${c.nombre_completo}</td>
-                    <td>${c.telefono || '-'}</td>
+                    <td>${displayTel}</td>
                     <td><span class="badge bg-${isActive ? 'success' : 'secondary'}">${isActive ? 'Activo' : 'Inactivo'}</span></td>
                     <td>${btns}</td>
                 </tr>
@@ -195,9 +320,11 @@
         openModal();
         document.getElementById('modal-title').textContent = 'Editar Miembro';
         document.getElementById('clie-id').value = c.id_cliente;
-        document.getElementById('clie-identidad').value = c.identidad || '';
+        
+        maskDni.value = c.identidad || '';
         document.getElementById('clie-nombre').value = c.nombre_completo || '';
-        document.getElementById('clie-telefono').value = c.telefono || '';
+        maskTelefono.value = c.telefono || '';
+        
         document.getElementById('clie-email').value = c.email || '';
         document.getElementById('clie-direccion').value = c.direccion || '';
         document.getElementById('identidad-feedback').innerHTML = '';

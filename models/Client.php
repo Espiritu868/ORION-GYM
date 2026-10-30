@@ -90,7 +90,7 @@ class Client {
     }
 
     public function checkIdentity($identidad, $excludeId = null) {
-        $sql = "SELECT nombre_completo, estado FROM CLIENTES WHERE identidad = ?";
+        $sql = "SELECT nombre_completo, estado FROM CLIENTES WHERE REPLACE(identidad, '-', '') = REPLACE(?, '-', '')";
         $params = [$identidad];
         if ($excludeId) {
             $sql .= " AND id_cliente != ?";
