@@ -59,6 +59,16 @@ $total_dias_rutina = $stmt_rut->fetchColumn();
 $stmt_asist = $conn->prepare("SELECT COUNT(*) FROM ASISTENCIA WHERE id_cliente = :id AND MONTH(fecha_hora) = MONTH(GETDATE()) AND YEAR(fecha_hora) = YEAR(GETDATE())");
 $stmt_asist->execute([':id' => $id_cliente]);
 $asistencias_mes = $stmt_asist->fetchColumn();
+
+// 4. Último Pago Realizado (Ventas / Mensualidad)
+$stmt_pago = $conn->prepare("
+    SELECT TOP 1 total, fecha_venta, metodo_pago 
+    FROM VENTAS 
+    WHERE id_cliente = :id 
+    ORDER BY fecha_venta DESC
+");
+$stmt_pago->execute([':id' => $id_cliente]);
+$ultimo_pago = $stmt_pago->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -131,25 +141,48 @@ $asistencias_mes = $stmt_asist->fetchColumn();
         </div>
 
         <!-- Métricas Rápidas -->
-        <div class="grid grid-cols-2 gap-3">
-            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-calendar-check"></i>
+        <div class="grid grid-cols-3 gap-2.5">
+            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-3 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] text-neutral-400 font-medium">Asistencias</span>
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
                 </div>
                 <div>
-                    <span class="text-[11px] text-neutral-400 block font-medium">Asistencias Mes</span>
-                    <span class="text-xl font-bold text-white"><?= $asistencias_mes ?></span>
+                    <span class="text-lg font-bold text-white"><?= $asistencias_mes ?></span>
+                    <span class="text-[9px] text-neutral-500 block">Este mes</span>
                 </div>
             </div>
 
-            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
-                    <i class="fa-solid fa-weight-scale"></i>
+            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-3 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] text-neutral-400 font-medium">Últ. Peso</span>
+                    <div class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-weight-scale"></i>
+                    </div>
                 </div>
                 <div>
-                    <span class="text-[11px] text-neutral-400 block font-medium">Último Peso</span>
-                    <span class="text-xl font-bold text-white">
-                        <?= !empty($ultima_medida['peso']) ? number_format($ultima_medida['peso'], 1) . ' lbs' : '--' ?>
+                    <span class="text-base font-bold text-white">
+                        <?= !empty($ultima_medida['peso']) ? number_format($ultima_medida['peso'], 1) . ' <span class="text-[10px] font-normal text-neutral-400">lbs</span>' : '--' ?>
+                    </span>
+                    <span class="text-[9px] text-neutral-500 block">Báscula</span>
+                </div>
+            </div>
+
+            <div class="bg-neutral-900 border border-neutral-800 rounded-2xl p-3 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] text-neutral-400 font-medium">Últ. Pago</span>
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-base font-bold text-emerald-400">
+                        <?= !empty($ultimo_pago['total']) ? 'L. ' . number_format($ultimo_pago['total'], 0) : '--' ?>
+                    </span>
+                    <span class="text-[9px] text-neutral-500 block truncate">
+                        <?= !empty($ultimo_pago['fecha_venta']) ? date('d/m/y', strtotime($ultimo_pago['fecha_venta'])) : 'Sin pagos' ?>
                     </span>
                 </div>
             </div>
