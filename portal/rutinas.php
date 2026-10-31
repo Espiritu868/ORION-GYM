@@ -53,10 +53,16 @@ foreach ($rutinas_dias as $rd) {
     ];
 }
 
-// También chequear si hay rutinas en la tabla simple anterior (RUTINAS_CLIENTE)
-$stmt_simple = $conn->prepare("SELECT dia_semana, descripcion_rutina FROM RUTINAS_CLIENTE WHERE id_cliente = :id ORDER BY dia_semana ASC");
-$stmt_simple->execute([':id' => $id_cliente]);
-$rutinas_simples = $stmt_simple->fetchAll(PDO::FETCH_KEY_PAIR);
+// Chequear si existe la tabla opcional de notas de rutinas simples
+$rutinas_simples = [];
+try {
+    $stmt_simple = $conn->prepare("SELECT dia_semana, descripcion_rutina FROM RUTINAS_CLIENTE WHERE id_cliente = :id ORDER BY dia_semana ASC");
+    $stmt_simple->execute([':id' => $id_cliente]);
+    $rutinas_simples = $stmt_simple->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    // Si no existe la tabla RUTINAS_CLIENTE, simplemente se continúa con el esquema avanzado
+    $rutinas_simples = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
