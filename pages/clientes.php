@@ -263,19 +263,21 @@
             
             let btns = '';
             <?php if(hasPerm('clientes_edit')): ?>
-            btns += `<button class="btn btn-sm btn-info text-white me-1" onclick="editClient(${c.id_cliente})"><i class="fas fa-edit"></i></button>`;
+            btns += `<button class="btn btn-sm btn-info text-white me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Editar Información" onclick="editClient(${c.id_cliente})"><i class="fas fa-edit"></i></button>`;
             <?php endif; ?>
             
             <?php if(hasPerm('clientes_delete')): ?>
             if (isActive) {
-                btns += `<button class="btn btn-sm btn-danger me-1" title="Dar de baja" onclick="changeState(${c.id_cliente}, 'deactivate')"><i class="fas fa-user-slash"></i></button>`;
+                btns += `<button class="btn btn-sm btn-danger me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Dar de Baja" onclick="changeState(${c.id_cliente}, 'deactivate')"><i class="fas fa-user-slash"></i></button>`;
             } else {
-                btns += `<button class="btn btn-sm btn-success me-1" title="Reactivar" onclick="changeState(${c.id_cliente}, 'activate')"><i class="fas fa-check"></i></button>`;
+                btns += `<button class="btn btn-sm btn-success me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Reactivar Miembro" onclick="changeState(${c.id_cliente}, 'activate')"><i class="fas fa-check"></i></button>`;
             }
             <?php endif; ?>
             
             // Add Profile button
-            btns += `<button class="btn btn-sm btn-secondary" title="Ver Expediente" onclick="viewProfile(${c.id_cliente}, '${c.nombre_completo.replace(/'/g, "\\'")}')"><i class="fas fa-id-badge"></i></button>`;
+            btns += `<button class="btn btn-sm btn-secondary me-1" data-bs-toggle="tooltip" data-bs-placement="top" title="Expediente (Historial y Pagos)" onclick="viewProfile(${c.id_cliente}, '${c.nombre_completo.replace(/'/g, "\\'")}')"><i class="fas fa-id-badge"></i></button>`;
+            btns += `<a class="btn btn-sm btn-primary text-white me-1" href="?page=progreso_cliente&id_cliente=${c.id_cliente}" data-bs-toggle="tooltip" data-bs-placement="top" title="Medidas y Progreso Físico"><i class="fas fa-ruler-combined"></i></a>`;
+            btns += `<a class="btn btn-sm btn-warning text-white me-1" href="?page=rutinas_cliente&id_cliente=${c.id_cliente}" data-bs-toggle="tooltip" data-bs-placement="top" title="Asignar Rutinas"><i class="fas fa-dumbbell"></i></a>`;
 
             let displayDni = (c.identidad || '-').replace(/[^0-9]/g, '');
             if (displayDni.length === 13) {
@@ -299,7 +301,16 @@
                 </tr>
             `);
         });
+    
+        // Inicializar tooltips de Bootstrap
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
     }
+
+
 
     function openModal() {
         document.getElementById('client-form').reset();
