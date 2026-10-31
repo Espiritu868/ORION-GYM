@@ -14,11 +14,11 @@ $conn = $db->getConnection();
 // 1. Obtener datos actualizados del socio y su membresía
 $stmt = $conn->prepare("
     SELECT c.id_cliente, c.nombre_completo, c.identidad, c.telefono, c.fotografia, c.fecha_ingreso,
-           m.id_membresia, m.fecha_inicio, m.fecha_fin, m.estado as estado_membresia,
+           m.id_membresia, m.fecha_inicio, m.fecha_fin, m.estado_membresia,
            p.nombre_plan, p.duracion_dias
     FROM CLIENTES c
-    LEFT JOIN MEMBRESIAS m ON c.id_cliente = m.id_cliente AND m.estado = 'Activa'
-    LEFT JOIN PLANES_ENTRENAMIENTO p ON m.id_plan = p.id_plan
+    LEFT JOIN MEMBRESIAS m ON c.id_cliente = m.id_cliente AND m.estado_membresia = 'Activa'
+    LEFT JOIN PLANES p ON m.id_plan = p.id_plan
     WHERE c.id_cliente = :id
 ");
 $stmt->execute([':id' => $id_cliente]);
@@ -219,3 +219,4 @@ $asistencias_mes = $stmt_asist->fetchColumn();
     </script>
 </body>
 </html>
+

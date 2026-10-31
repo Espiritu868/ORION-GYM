@@ -17,11 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Buscar socio activo
             $stmt = $conn->prepare("
                 SELECT c.id_cliente, c.nombre_completo, c.identidad, c.telefono, c.fotografia, c.fecha_ingreso,
-                       m.id_membresia, m.fecha_inicio, m.fecha_fin, m.estado as estado_membresia,
+                       m.id_membresia, m.fecha_inicio, m.fecha_fin, m.estado_membresia,
                        p.nombre_plan, p.duracion_dias
                 FROM CLIENTES c
-                LEFT JOIN MEMBRESIAS m ON c.id_cliente = m.id_cliente AND m.estado = 'Activa'
-                LEFT JOIN PLANES_ENTRENAMIENTO p ON m.id_plan = p.id_plan
+                LEFT JOIN MEMBRESIAS m ON c.id_cliente = m.id_cliente AND m.estado_membresia = 'Activa'
+                LEFT JOIN PLANES p ON m.id_plan = p.id_plan
                 WHERE c.identidad = :identidad AND c.estado = 1
             ");
             $stmt->execute([':identidad' => $identidad]);
@@ -164,3 +164,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </script>
 </body>
 </html>
+
