@@ -181,3 +181,4 @@ function diff_badge($val1, $val2, $unidad = 'lbs', $invert = false) {
     </nav>
 </body>
 </html>
+

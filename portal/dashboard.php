@@ -13,13 +13,15 @@ $conn = $db->getConnection();
 
 // 1. Obtener datos actualizados del socio y su membresía
 $stmt = $conn->prepare("
-    SELECT c.id_cliente, c.nombre_completo, c.identidad, c.telefono, c.fotografia, c.fecha_ingreso,
+    SELECT TOP 1 c.id_cliente, c.nombre_completo, c.identidad, c.telefono, c.fecha_ingreso,
+           CASE WHEN DATALENGTH(c.fotografia) > 0 THEN 1 ELSE 0 END AS tiene_foto,
            m.id_membresia, m.fecha_inicio, m.fecha_fin, m.estado_membresia,
            p.nombre_plan, p.duracion_dias
     FROM CLIENTES c
     LEFT JOIN MEMBRESIAS m ON c.id_cliente = m.id_cliente AND m.estado_membresia = 'Activa'
     LEFT JOIN PLANES p ON m.id_plan = p.id_plan
     WHERE c.id_cliente = :id
+    ORDER BY m.fecha_fin DESC
 ");
 $stmt->execute([':id' => $id_cliente]);
 $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -98,8 +100,8 @@ $asistencias_mes = $stmt_asist->fetchColumn();
         <div class="relative overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-900 to-neutral-800/80 border border-neutral-800 rounded-3xl p-5 shadow-xl">
             <div class="flex items-center gap-4">
                 <div class="relative">
-                    <?php if (!empty($cliente['fotografia'])): ?>
-                        <img src="../uploads/clientes/<?= htmlspecialchars($cliente['fotografia']) ?>" alt="Foto" class="w-16 h-16 rounded-2xl object-cover border-2 border-amber-500 shadow-md">
+                    <?php if (!empty($cliente['tiene_foto'])): ?>
+                        <img src="../controllers/ClientController.php?action=photo&id_cliente=<?= $cliente['id_cliente'] ?>&thumb=true" alt="Foto" class="w-16 h-16 rounded-2xl object-cover border-2 border-amber-500 shadow-md">
                     <?php else: ?>
                         <div class="w-16 h-16 rounded-2xl bg-neutral-800 border-2 border-amber-500/60 flex items-center justify-center text-amber-400 text-2xl font-bold">
                             <?= strtoupper(substr($cliente['nombre_completo'], 0, 1)) ?>

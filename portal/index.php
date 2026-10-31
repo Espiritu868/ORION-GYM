@@ -6,25 +6,33 @@ $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $identidad = trim($_POST['identidad'] ?? '');
+    // Limpiar caracteres no numéricos o espacios para permitir búsqueda flexible
+    $identidad_limpia = preg_replace('/[^0-9kK]/', '', $identidad);
 
-    if (empty($identidad)) {
+    if (empty($identidad_limpia)) {
         $error = 'Por favor ingresa tu número de identidad.';
     } else {
         try {
             $db = new Database();
             $conn = $db->getConnection();
 
-            // Buscar socio activo
+            // Buscar socio activo comparando con y sin guiones (usando REPLACE en SQL)
             $stmt = $conn->prepare("
-                SELECT c.id_cliente, c.nombre_completo, c.identidad, c.telefono, c.fotografia, c.fecha_ingreso,
+                SELECT TOP 1 c.id_cliente, c.nombre_completo, c.identidad, c.telefono, c.fecha_ingreso,
+                       CASE WHEN DATALENGTH(c.fotografia) > 0 THEN 1 ELSE 0 END AS tiene_foto,
                        m.id_membresia, m.fecha_inicio, m.fecha_fin, m.estado_membresia,
                        p.nombre_plan, p.duracion_dias
                 FROM CLIENTES c
                 LEFT JOIN MEMBRESIAS m ON c.id_cliente = m.id_cliente AND m.estado_membresia = 'Activa'
                 LEFT JOIN PLANES p ON m.id_plan = p.id_plan
-                WHERE c.identidad = :identidad AND c.estado = 1
+                WHERE (c.identidad = :identidad_raw OR REPLACE(REPLACE(c.identidad, '-', ''), ' ', '') = :identidad_clean)
+                  AND c.estado = 1
+                ORDER BY m.fecha_fin DESC
             ");
-            $stmt->execute([':identidad' => $identidad]);
+            $stmt->execute([
+                ':identidad_raw' => $identidad,
+                ':identidad_clean' => $identidad_limpia
+            ]);
             $cliente = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($cliente) {
@@ -32,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['socio_id'] = $cliente['id_cliente'];
                 $_SESSION['socio_nombre'] = $cliente['nombre_completo'];
                 $_SESSION['socio_identidad'] = $cliente['identidad'];
-                $_SESSION['socio_foto'] = $cliente['fotografia'] ?? '';
                 $_SESSION['socio_plan'] = $cliente['nombre_plan'] ?? 'Sin membresía activa';
                 $_SESSION['socio_vence'] = $cliente['fecha_fin'] ?? null;
                 
