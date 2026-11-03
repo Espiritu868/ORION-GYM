@@ -128,6 +128,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <span>Instalar como App en mi celular</span>
             </button>
         </div>
+
+        <!-- Banner especial para usuarios de iPhone (iOS) -->
+        <div id="ios-install-banner" class="hidden mt-6 pt-4 border-t border-neutral-800 text-center">
+            <button onclick="document.getElementById('ios-modal').classList.remove('hidden')" class="w-full bg-neutral-800/80 hover:bg-neutral-800 text-amber-400 font-medium py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-2 border border-amber-500/30">
+                <i class="fa-brands fa-apple text-base"></i>
+                <span>¿Cómo instalar en mi iPhone?</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal instructivo para iPhone -->
+    <div id="ios-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl animate-fade-in">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl">
+                <i class="fa-brands fa-apple"></i>
+            </div>
+            <h3 class="text-base font-bold text-white">Instalar en iPhone / iPad</h3>
+            <p class="text-xs text-neutral-400">
+                Para tener la app en tu pantalla de inicio en iOS:
+            </p>
+            <div class="space-y-3 text-left text-xs bg-neutral-950/80 p-4 rounded-2xl border border-neutral-800">
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-full bg-amber-500 text-neutral-950 font-bold flex items-center justify-center text-xs shrink-0">1</span>
+                    <span>Toca el botón <strong class="text-white">Compartir</strong> de Safari abajo (<i class="fa-solid fa-arrow-up-from-bracket text-amber-400"></i>).</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-full bg-amber-500 text-neutral-950 font-bold flex items-center justify-center text-xs shrink-0">2</span>
+                    <span>Desliza hacia abajo y elige <strong class="text-white">"Agregar a inicio"</strong> (<i class="fa-regular fa-square-plus text-amber-400"></i>).</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="w-6 h-6 rounded-full bg-amber-500 text-neutral-950 font-bold flex items-center justify-center text-xs shrink-0">3</span>
+                    <span>Pulsa <strong class="text-white">"Agregar"</strong> arriba a la derecha.</span>
+                </div>
+            </div>
+            <button onclick="document.getElementById('ios-modal').classList.add('hidden')" class="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-2.5 rounded-xl text-xs">
+                Entendido
+            </button>
+        </div>
     </div>
 
     <!-- Footer -->
@@ -145,7 +183,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         }
 
-        // Detección de instalación PWA
+        // Detectar si es iOS (iPhone / iPad) y no está ya instalado en standalone
+        const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+
+        if (isIos && !isStandalone) {
+            const iosBanner = document.getElementById('ios-install-banner');
+            if (iosBanner) iosBanner.classList.remove('hidden');
+        }
+
+        // Detección de instalación PWA en Android/Chrome
         let deferredPrompt;
         const installBanner = document.getElementById('pwa-install-banner');
         const installBtn = document.getElementById('pwa-install-btn');
