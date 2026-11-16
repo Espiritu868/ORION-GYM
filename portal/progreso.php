@@ -56,7 +56,7 @@ function diff_badge($val1, $val2, $unidad = 'lbs', $invert = false) {
             </a>
             <div>
                 <h1 class="text-sm font-black tracking-tight text-white leading-none">Mi Progreso</h1>
-                <span class="text-[10px] text-[#d4af37]">Fortia Gym • SATEC</span>
+                <span class="text-[10px] text-[#d4af37]">Fortia Gym • Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)</span>
             </div>
         </div>
     </header>

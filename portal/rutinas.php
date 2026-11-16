@@ -87,7 +87,7 @@ try {
             </a>
             <div>
                 <h1 class="text-sm font-black tracking-tight text-white leading-none">Mis Rutinas</h1>
-                <span class="text-[10px] text-[#d4af37]">Fortia Gym • SATEC</span>
+                <span class="text-[10px] text-[#d4af37]">Fortia Gym • Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)</span>
             </div>
         </div>
     </header>

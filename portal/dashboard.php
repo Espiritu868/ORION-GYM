@@ -93,7 +93,7 @@ $ultimo_pago = $stmt_pago->fetch(PDO::FETCH_ASSOC);
             <img src="logo.jpeg" alt="Logo Fortia Gym" class="w-10 h-10 rounded-full object-cover border-2 border-[#d4af37] shadow-md shadow-[#d4af37]/20">
             <div>
                 <h1 class="text-sm font-black tracking-tight text-white leading-none">FORTIA <span class="text-[#dc2626]">GYM</span></h1>
-                <span class="text-[10px] text-neutral-400 font-medium">SATEC Socios</span>
+                <span class="text-[10px] text-neutral-400 font-medium">Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)</span>
             </div>
         </div>
 
@@ -224,6 +224,12 @@ $ultimo_pago = $stmt_pago->fetch(PDO::FETCH_ASSOC);
             </a>
 
         </div>
+
+        <!-- Footer portal socios -->
+        <footer class="mt-8 mb-4 text-center text-xs text-neutral-500">
+            <p>&copy; <?= date('Y') ?> <strong>FORTIA GYM</strong></p>
+            <p class="text-[11px] text-neutral-600 mt-0.5">Desarrollado por <strong>Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)</strong></p>
+        </footer>
 
     </main>
 

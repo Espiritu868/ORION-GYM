@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             FORTIA <span class="text-[#dc2626]">GYM</span>
         </h1>
         <p class="text-[#d4af37] text-xs font-semibold tracking-wider uppercase mt-1">Portal Oficial de Socios</p>
-        <p class="text-neutral-500 text-[10px] mt-0.5">SATEC (Sistemas y Automatizacion Tecnologica S de R.L)</p>
+        <p class="text-neutral-400 text-xs mt-1">Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)</p>
     </div>
 
     <!-- Login Card -->
