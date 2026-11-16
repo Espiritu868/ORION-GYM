@@ -30,7 +30,17 @@ $stmt = $db->query("
 ");
 $ingresos_mes = (float)$stmt->fetchColumn();
 
-// 5. Próximas a vencer (próximos 7 días o que vencen hoy/mañana)
+// 5. Productos con Stock Bajo o Agotado (<= 5 unidades)
+$stmt = $db->query("
+    SELECT id_producto, nombre_producto, stock, precio_venta
+    FROM PRODUCTOS
+    WHERE estado = 1 AND stock <= 5
+    ORDER BY stock ASC, nombre_producto ASC
+");
+$productos_bajo_stock = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$total_bajo_stock = count($productos_bajo_stock);
+
+// 6. Próximas a vencer (próximos 7 días o que vencen hoy/mañana)
 $stmt = $db->query("
     SELECT TOP 5 
            c.nombre_completo, 
@@ -46,7 +56,7 @@ $stmt = $db->query("
 ");
 $proximas_vencer = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// 6. Ingresos de los últimos 7 días reales para el gráfico
+// 7. Ingresos de los últimos 7 días reales para el gráfico
 $dias_grafico = [];
 $ingresos_grafico = [];
 $nombres_dias_es = [
@@ -80,6 +90,24 @@ for ($i = 6; $i >= 0; $i--) {
 
 <!-- Se incluye Chart.js para gráficos -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<?php if ($total_bajo_stock > 0): ?>
+    <!-- Alerta Global de Stock Bajo -->
+    <div class="alert alert-danger shadow-sm border-0 d-flex align-items-center justify-content-between p-3 mb-4 rounded-4" role="alert" style="background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%, rgba(220, 38, 38, 0.05) 100%); border-left: 5px solid #dc2626 !important;">
+        <div class="d-flex align-items-center">
+            <div class="me-3 fs-3 text-danger">
+                <i class="fas fa-boxes-stacked animate-bounce"></i>
+            </div>
+            <div>
+                <h6 class="fw-bold mb-0 text-danger">¡Alerta de Inventario!</h6>
+                <small class="text-dark">Hay <strong><?= $total_bajo_stock ?></strong> producto(s) con existencias mínimas o agotadas (≤ 5 unidades).</small>
+            </div>
+        </div>
+        <a href="index.php?page=administracion" class="btn btn-danger btn-sm rounded-pill px-3 shadow-sm">
+            <i class="fas fa-arrow-right me-1"></i> Ir a Inventario
+        </a>
+    </div>
+<?php endif; ?>
 
 <div class="row g-3 mb-4">
     <div class="col-md-3 col-sm-6">
@@ -133,14 +161,15 @@ for ($i = 6; $i >= 0; $i--) {
         </div>
     </div>
     
-    <div class="col-lg-4">
-        <div class="card shadow-sm border-0 h-100" style="border-radius: 16px;">
+    <div class="col-lg-4 d-flex flex-column gap-4">
+        <!-- Tarjeta de Membresías Próximas a Vencer -->
+        <div class="card shadow-sm border-0 flex-fill" style="border-radius: 16px;">
             <div class="card-body p-4 d-flex flex-column">
-                <h5 class="fw-bold text-danger mb-3"><i class="fas fa-bell me-2"></i> Próximas a Vencer</h5>
-                <p class="text-muted small mb-3">Socios con vencimiento en los próximos 7 días</p>
+                <h5 class="fw-bold text-danger mb-2"><i class="fas fa-bell me-2"></i> Próximas a Vencer</h5>
+                <p class="text-muted small mb-3">Socios por vencer en los próximos 7 días</p>
                 
                 <?php if (empty($proximas_vencer)): ?>
-                    <div class="text-center text-muted my-auto py-4">
+                    <div class="text-center text-muted my-auto py-3">
                         <i class="fas fa-calendar-check fs-2 text-success mb-2"></i>
                         <p class="mb-0 small">No hay membresías por vencer próximamente.</p>
                     </div>
@@ -168,9 +197,61 @@ for ($i = 6; $i >= 0; $i--) {
                     </ul>
                 <?php endif; ?>
 
-                <div class="text-center mt-3 pt-3 border-top">
+                <div class="text-center mt-3 pt-2 border-top">
                     <a href="index.php?page=membresias" class="btn btn-sm btn-outline-primary w-100 rounded-pill">
-                        Ver todas las membresías <i class="fas fa-arrow-right ms-1"></i>
+                        Ver membresías <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Alerta de Stock de Productos -->
+        <div class="card shadow-sm border-0 flex-fill" style="border-radius: 16px;">
+            <div class="card-body p-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="fw-bold mb-0 text-dark">
+                        <i class="fas fa-cubes-stacked text-warning me-2"></i> Alerta de Stock
+                    </h5>
+                    <?php if ($total_bajo_stock > 0): ?>
+                        <span class="badge bg-danger rounded-pill"><?= $total_bajo_stock ?> críticos</span>
+                    <?php else: ?>
+                        <span class="badge bg-success rounded-pill">Óptimo</span>
+                    <?php endif; ?>
+                </div>
+                <p class="text-muted small mb-3">Productos con inventario bajo (≤ 5 unid.)</p>
+
+                <?php if (empty($productos_bajo_stock)): ?>
+                    <div class="text-center text-muted my-auto py-3">
+                        <i class="fas fa-circle-check fs-2 text-success mb-2"></i>
+                        <p class="mb-0 small">Todos los productos cuentan con stock suficiente.</p>
+                    </div>
+                <?php else: ?>
+                    <ul class="list-group list-group-flush mb-auto">
+                        <?php foreach (array_slice($productos_bajo_stock, 0, 4) as $prod): ?>
+                            <?php 
+                                $stk = (int)$prod['stock'];
+                                if ($stk <= 0) {
+                                    $stk_badge = '<span class="badge bg-danger rounded-pill">Agotado (0)</span>';
+                                } else if ($stk <= 2) {
+                                    $stk_badge = '<span class="badge bg-danger rounded-pill">' . $stk . ' unid.</span>';
+                                } else {
+                                    $stk_badge = '<span class="badge bg-warning text-dark rounded-pill">' . $stk . ' unid.</span>';
+                                }
+                            ?>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 mb-2">
+                                <div class="me-2">
+                                    <h6 class="mb-0 fw-bold text-dark text-truncate" style="max-width: 170px;"><?= htmlspecialchars($prod['nombre_producto']) ?></h6>
+                                    <small class="text-muted">Precio: L <?= number_format($prod['precio_venta'], 2) ?></small>
+                                </div>
+                                <?= $stk_badge ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+
+                <div class="text-center mt-3 pt-2 border-top">
+                    <a href="index.php?page=administracion" class="btn btn-sm btn-outline-warning text-dark w-100 rounded-pill">
+                        Ver inventario completo <i class="fas fa-boxes-stacked ms-1"></i>
                     </a>
                 </div>
             </div>

@@ -38,8 +38,25 @@ $page = $_GET['page'] ?? 'dashboard';
                     ?>
                 </h5>
             </div>
-            <div>
-                <!-- Opcional: Info de usuario o notificaciones aquí -->
+            
+            <?php
+            // Consultar productos con stock crítico para la campanita del topbar
+            $badgeStock = 0;
+            try {
+                $dbTop = (new Database())->getConnection();
+                $badgeStock = (int)$dbTop->query("SELECT COUNT(*) FROM PRODUCTOS WHERE estado = 1 AND stock <= 5")->fetchColumn();
+            } catch(Exception $e){}
+            ?>
+            <div class="d-flex align-items-center gap-3">
+                <?php if ($badgeStock > 0): ?>
+                    <a href="index.php?page=administracion" class="position-relative text-decoration-none" title="Ver <?= $badgeStock ?> productos con stock bajo">
+                        <div class="btn btn-outline-danger btn-sm rounded-pill d-flex align-items-center gap-1.5 px-2.5 py-1">
+                            <i class="fas fa-box-open"></i>
+                            <span class="small fw-bold d-none d-sm-inline">Stock Bajo</span>
+                            <span class="badge bg-danger rounded-pill"><?= $badgeStock ?></span>
+                        </div>
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
         
@@ -77,7 +94,7 @@ $page = $_GET['page'] ?? 'dashboard';
         </div>
         
         <!-- Footer fijo siempre visible al fondo de la pantalla -->
-        <footer class="fixed-footer py-3.5 px-4 text-center text-secondary bg-white border-top shadow-sm" style="font-size: 0.88rem; min-height: 52px; display: flex; align-items: center; justify-content: center;">
+        <footer class="fixed-footer py-3.5 px-4 text-center text-secondary bg-white border-top shadow-sm" style="font-size: 0.85rem; min-height: 42px; display: flex; align-items: center; justify-content: center;">
             <span>&copy; <?= date('Y') ?> <strong class="text-dark"><?= SYSTEM_NAME ?></strong> | Desarrollado por <strong class="text-dark"><?= COMPANY_NAME ?></strong></span>
         </footer>
     </div>
