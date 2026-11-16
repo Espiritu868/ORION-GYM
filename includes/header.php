@@ -64,10 +64,31 @@
         }
 
         @media (max-width: 768px) {
-            .sidebar { left: -250px; width: 250px !important; }
-            .sidebar.show { left: 0; }
+            .sidebar { 
+                left: -260px; 
+                width: 260px !important; 
+                box-shadow: 10px 0 25px rgba(0,0,0,0.5);
+                z-index: 1060;
+            }
+            .sidebar.show { 
+                left: 0 !important; 
+            }
             #main-content { margin-left: 0; width: 100%; }
             #main-content.expanded { margin-left: 0; width: 100%; }
+            .sidebar-backdrop {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.55);
+                backdrop-filter: blur(2px);
+                z-index: 1050;
+            }
+            .sidebar-backdrop.show {
+                display: block;
+            }
         }
 
         /* Modal centering relative to the white panel */

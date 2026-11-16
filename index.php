@@ -11,6 +11,8 @@ $page = $_GET['page'] ?? 'dashboard';
 ?>
 <?php include 'includes/header.php'; ?>
 <div class="d-flex">
+    <!-- Backdrop oscuro para móvil -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop d-md-none"></div>
     <?php include 'includes/sidebar.php'; ?>
     
     <!-- Main Content -->
@@ -125,19 +127,29 @@ $page = $_GET['page'] ?? 'dashboard';
         const mainContent = document.getElementById('main-content');
         const toggleBtn = document.getElementById('sidebarToggle');
         const toggleMobileBtn = document.getElementById('sidebarToggleMobile');
+        const backdrop = document.getElementById('sidebarBackdrop');
 
         function toggleSidebar() {
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            document.body.classList.toggle('sidebar-collapsed');
+            if (window.innerWidth <= 768) {
+                // En móvil alterna visibilidad y backdrop
+                sidebar.classList.toggle('show');
+                if (backdrop) backdrop.classList.toggle('show');
+            } else {
+                // En PC colapsa/expande
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                document.body.classList.toggle('sidebar-collapsed');
+            }
         }
 
-        function toggleMobileSidebar() {
-            sidebar.classList.toggle('show');
+        function closeMobileSidebar() {
+            sidebar.classList.remove('show');
+            if (backdrop) backdrop.classList.remove('show');
         }
 
         if(toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
-        if(toggleMobileBtn) toggleMobileBtn.addEventListener('click', toggleMobileSidebar);
+        if(toggleMobileBtn) toggleMobileBtn.addEventListener('click', toggleSidebar);
+        if(backdrop) backdrop.addEventListener('click', closeMobileSidebar);
     });
 </script>
 

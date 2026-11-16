@@ -1,4 +1,4 @@
-<div class="sidebar d-none d-md-flex flex-column" id="sidebar">
+<div class="sidebar flex-column" id="sidebar">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center gap-2">
             <img src="assets/img/logo.jpeg" alt="Logo" class="rounded-circle border border-warning" style="width: 38px; height: 38px; object-fit: cover;">
@@ -7,8 +7,10 @@
                 <small class="text-secondary" style="font-size: 0.65rem;">SATEC</small>
             </div>
         </div>
-        <button class="btn btn-link text-white p-0 text-decoration-none" id="sidebarToggle">
-            <i class="fas fa-bars fs-5"></i>
+        <!-- Botón colapsar en PC / cerrar en Móvil -->
+        <button class="btn btn-link text-white p-0 text-decoration-none" id="sidebarToggle" title="Cerrar / Alternar Menú">
+            <i class="fas fa-bars fs-5 d-none d-md-inline"></i>
+            <i class="fas fa-times fs-5 d-md-none text-danger"></i>
         </button>
     </div>
     
