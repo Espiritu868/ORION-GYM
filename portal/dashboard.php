@@ -35,10 +35,17 @@ if (!empty($cliente['fecha_fin'])) {
     $hoy = new DateTime();
     $fin = new DateTime($cliente['fecha_fin']);
     $diff = $hoy->diff($fin);
+    $dias_diferencia = (int)$diff->format("%r%a");
+
     if ($fin >= $hoy) {
-        $dias_restantes = (int)$diff->format("%r%a");
+        $dias_restantes = $dias_diferencia;
         $estado_texto = "Activa ({$dias_restantes} días rest.)";
         $badge_color = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+    } elseif ($dias_diferencia >= -7) {
+        // En período de gracia (hasta 7 días después)
+        $dias_gracia = 7 + $dias_diferencia;
+        $estado_texto = "En Gracia ({$dias_gracia} días rest.)";
+        $badge_color = "bg-amber-500/10 text-amber-400 border-amber-500/30";
     } else {
         $estado_texto = "Vencida";
         $badge_color = "bg-rose-500/10 text-rose-400 border-rose-500/30";

@@ -30,9 +30,16 @@ class MembershipController {
             $diff = $today->diff($endDate);
             $m['dias_restantes'] = (int)$diff->format('%R%a'); // e.g. +13 or -5
             
-            // Re-evaluate 'Por Vencer' logic strictly for the UI badges
-            if ($m['estado_membresia'] === 'Activa' && $m['dias_restantes'] >= 0 && $m['dias_restantes'] <= 3) {
-                $m['estado_ui'] = 'Por Vencer';
+            // Re-evaluate 'Por Vencer' y 'En Gracia' logic strictly for the UI badges
+            if ($m['estado_membresia'] === 'Activa') {
+                if ($m['dias_restantes'] >= 0 && $m['dias_restantes'] <= 3) {
+                    $m['estado_ui'] = 'Por Vencer';
+                } elseif ($m['dias_restantes'] < 0 && $m['dias_restantes'] >= -7) {
+                    $dias_gracia_quedan = 7 + $m['dias_restantes']; // ej: -2 -> quedan 5 días de gracia
+                    $m['estado_ui'] = "En Gracia ({$dias_gracia_quedan}d)";
+                } else {
+                    $m['estado_ui'] = $m['estado_membresia'];
+                }
             } else {
                 $m['estado_ui'] = $m['estado_membresia'];
             }

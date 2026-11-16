@@ -56,30 +56,48 @@ if ($action === 'check_in') {
         $membershipModel = new Membership();
         $membershipModel->autoUpdateExpired();
 
+        // Verificar membresía activa o dentro del período de gracia (7 días posteriores a fecha_fin)
         $stmtM = $db->prepare("
-            SELECT TOP 1 m.fecha_fin, p.nombre_plan 
+            SELECT TOP 1 m.fecha_fin, p.nombre_plan,
+                   DATEDIFF(day, CAST(GETDATE() AS DATE), m.fecha_fin) as dias_diferencia
             FROM MEMBRESIAS m
             JOIN PLANES p ON m.id_plan = p.id_plan
-            WHERE m.id_cliente = ? AND m.estado_membresia = 'Activa'
+            WHERE m.id_cliente = ? 
+              AND (
+                  (m.estado_membresia = 'Activa' AND m.fecha_fin >= CAST(GETDATE() AS DATE))
+                  OR 
+                  (m.fecha_fin >= DATEADD(day, -7, CAST(GETDATE() AS DATE)))
+              )
             ORDER BY m.fecha_fin DESC
         ");
         $stmtM->execute([$cliente['id_cliente']]);
         $activa = $stmtM->fetch(PDO::FETCH_ASSOC);
 
         if ($activa) {
+            // Determinar si está en período de gracia
+            $diasDif = (int)$activa['dias_diferencia'];
+            $mensajeAcceso = 'ACCESO PERMITIDO';
+            $statusColor = 'success';
+
+            if ($diasDif < 0) {
+                $diasGraciaRestantes = 7 + $diasDif;
+                $mensajeAcceso = "ACCESO EN PERÍODO DE GRACIA (Venció hace " . abs($diasDif) . " días - Le quedan {$diasGraciaRestantes} días de gracia)";
+                $statusColor = 'warning';
+            }
+
             // Registrar asistencia
             $stmtInsert = $db->prepare("INSERT INTO ASISTENCIA (id_cliente, fecha_hora) VALUES (?, GETDATE())");
             $stmtInsert->execute([$cliente['id_cliente']]);
 
             echo json_encode([
                 'success' => true,
-                'message' => 'ACCESO PERMITIDO',
+                'message' => $mensajeAcceso,
                 'cliente' => $cliente['nombre_completo'],
                 'plan' => $activa['nombre_plan'],
                 'vence' => $activa['fecha_fin'],
                 'tiene_foto' => $cliente['tiene_foto'],
                 'id_cliente' => $cliente['id_cliente'],
-                'status_color' => 'success'
+                'status_color' => $statusColor
             ]);
         } else {
             echo json_encode([

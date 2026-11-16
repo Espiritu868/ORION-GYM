@@ -55,15 +55,18 @@ switch ($action) {
                         WHEN c.estado = 1 AND EXISTS (
                             SELECT 1 FROM MEMBRESIAS m 
                             WHERE m.id_cliente = c.id_cliente 
-                              AND m.estado_membresia = 'Activa'
-                              AND m.fecha_fin >= CAST(GETDATE() AS DATE)
+                              AND (
+                                  (m.estado_membresia = 'Activa' AND m.fecha_fin >= CAST(GETDATE() AS DATE))
+                                  OR 
+                                  (m.fecha_fin >= DATEADD(day, -7, CAST(GETDATE() AS DATE)))
+                              )
                         ) THEN 1 
                         ELSE 0 
                     END as puede_acceder,
                     (
                         SELECT TOP 1 m2.fecha_fin 
                         FROM MEMBRESIAS m2 
-                        WHERE m2.id_cliente = c.id_cliente AND m2.estado_membresia = 'Activa'
+                        WHERE m2.id_cliente = c.id_cliente
                         ORDER BY m2.fecha_fin DESC
                     ) as fecha_vence
                 FROM CLIENTES c
@@ -115,12 +118,18 @@ switch ($action) {
                 exit;
             }
 
-            // Verificar membresía activa
+            // Verificar membresía activa o dentro de los 7 días de gracia
             $stmtM = $db->prepare("
-                SELECT TOP 1 m.fecha_fin, p.nombre_plan 
+                SELECT TOP 1 m.fecha_fin, p.nombre_plan,
+                       DATEDIFF(day, CAST(GETDATE() AS DATE), m.fecha_fin) as dias_diferencia
                 FROM MEMBRESIAS m
                 JOIN PLANES p ON m.id_plan = p.id_plan
-                WHERE m.id_cliente = ? AND m.estado_membresia = 'Activa' AND m.fecha_fin >= CAST(GETDATE() AS DATE)
+                WHERE m.id_cliente = ? 
+                  AND (
+                      (m.estado_membresia = 'Activa' AND m.fecha_fin >= CAST(GETDATE() AS DATE))
+                      OR 
+                      (m.fecha_fin >= DATEADD(day, -7, CAST(GETDATE() AS DATE)))
+                  )
                 ORDER BY m.fecha_fin DESC
             ");
             $stmtM->execute([$idCliente]);
@@ -136,6 +145,13 @@ switch ($action) {
             $isDuplicate = $stmtDup->fetch();
 
             if ($cliente['estado'] == 1 && $membresia) {
+                $diasDif = (int)$membresia['dias_diferencia'];
+                $msgStatus = 'ACCESO PERMITIDO';
+                if ($diasDif < 0) {
+                    $diasGracia = 7 + $diasDif;
+                    $msgStatus = "ACCESO EN GRACIA ({$diasGracia} días restantes de gracia)";
+                }
+
                 $insertSql = "INSERT INTO ASISTENCIA (id_cliente, fecha_hora, fecha_biometrico) VALUES (?, GETDATE(), ?)";
                 $stmtIns = $db->prepare($insertSql);
                 $stmtIns->execute([$idCliente, !empty($fechaHora) ? $fechaHora : null]);
@@ -147,7 +163,8 @@ switch ($action) {
                     'cliente' => $cliente['nombre_completo'],
                     'plan' => $membresia['nombre_plan'],
                     'vence' => $membresia['fecha_fin'],
-                    'message' => 'ACCESO PERMITIDO'
+                    'en_gracia' => ($diasDif < 0),
+                    'message' => $msgStatus
                 ]);
             } else {
                 echo json_encode([

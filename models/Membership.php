@@ -10,9 +10,11 @@ class Membership {
     }
 
     // Auto-update expired memberships
+    // Se consideran 7 días de gracia antes de marcarla como 'Vencida'
     public function autoUpdateExpired() {
         $sql = "UPDATE MEMBRESIAS SET estado_membresia = 'Vencida' 
-                WHERE estado_membresia = 'Activa' AND fecha_fin < CAST(GETDATE() AS DATE)";
+                WHERE estado_membresia = 'Activa' 
+                  AND DATEADD(day, 7, fecha_fin) < CAST(GETDATE() AS DATE)";
         $this->db->query($sql);
     }
 
@@ -29,7 +31,7 @@ class Membership {
         if ($filterStatus === 'activas') {
             $sql .= " WHERE m.estado_membresia IN ('Activa', 'Pendiente') ";
         } else if ($filterStatus === 'vencidas') {
-            $sql .= " WHERE m.estado_membresia = 'Vencida' OR (m.estado_membresia = 'Activa' AND m.fecha_fin BETWEEN CAST(GETDATE() AS DATE) AND DATEADD(day, 3, CAST(GETDATE() AS DATE))) ";
+            $sql .= " WHERE m.estado_membresia = 'Vencida' OR (m.estado_membresia = 'Activa' AND m.fecha_fin < CAST(GETDATE() AS DATE)) ";
         } else if ($filterStatus === 'canceladas') {
             $sql .= " WHERE m.estado_membresia = 'Cancelada' ";
         }
