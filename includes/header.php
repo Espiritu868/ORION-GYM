@@ -20,10 +20,18 @@
             --fortia-red: #dc2626;
             --fortia-dark: #0f172a;
         }
-        body { background: #f8fafc; color: #333; font-family: 'Outfit'; overflow-x: hidden; }
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            background: #f8fafc; 
+            color: #333; 
+            font-family: 'Outfit'; 
+            overflow: hidden; 
+        }
         
         .sidebar { 
-            min-height: 100vh; 
+            height: 100vh; 
             background: linear-gradient(180deg, #111827 0%, #030712 100%); 
             border-right: 1px solid rgba(212, 175, 55, 0.2);
             color: white; 
@@ -34,6 +42,7 @@
             top: 0;
             z-index: 1040;
             transition: all 0.3s ease;
+            overflow-y: auto;
             overflow-x: hidden;
         }
         .sidebar.collapsed {
@@ -44,9 +53,10 @@
             transition: all 0.3s ease;
             margin-left: 250px;
             width: calc(100% - 250px);
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         #main-content.expanded {
             margin-left: 80px;
@@ -87,8 +97,9 @@
         .sidebar.collapsed .sidebar-text, .sidebar.collapsed h4 { display: none; }
         .sidebar.collapsed a { justify-content: center; }
         .sidebar.collapsed i { margin-right: 0 !important; font-size: 1.2rem; }
-        .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid rgba(212, 175, 55, 0.25); }
-        .content { padding: 30px; }
+        .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid rgba(212, 175, 55, 0.25); flex-shrink: 0; }
+        .content { padding: 30px; flex: 1 1 auto; overflow-y: auto; }
+        .fixed-footer { flex-shrink: 0; z-index: 1020; }
         .table-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .client-photo-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
         .qr-container { text-align: center; margin: 20px 0; display: none; }

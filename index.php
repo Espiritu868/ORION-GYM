@@ -76,8 +76,8 @@ $page = $_GET['page'] ?? 'dashboard';
             ?>
         </div>
         
-        <!-- Footer anclado siempre al pie del contenido -->
-        <footer class="mt-auto py-3 px-4 text-center text-muted small bg-white border-top">
+        <!-- Footer fijo siempre visible al fondo de la pantalla -->
+        <footer class="fixed-footer py-2.5 px-4 text-center text-muted small bg-white border-top shadow-sm">
             <span>&copy; <?= date('Y') ?> <strong><?= SYSTEM_NAME ?></strong> | Desarrollado por <strong><?= COMPANY_NAME ?></strong></span>
         </footer>
     </div>
