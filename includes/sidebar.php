@@ -1,6 +1,12 @@
 <div class="sidebar d-none d-md-flex flex-column" id="sidebar">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="mb-0 text-white fw-bold" style="font-family: 'Outfit';"><?= SYSTEM_NAME ?></h4>
+        <div class="d-flex align-items-center gap-2">
+            <img src="assets/img/logo.jpeg" alt="Logo" class="rounded-circle border border-warning" style="width: 38px; height: 38px; object-fit: cover;">
+            <div class="sidebar-text">
+                <h5 class="mb-0 text-white fw-bold" style="font-family: 'Outfit'; letter-spacing: 0.5px;">FORTIA <span class="text-danger">GYM</span></h5>
+                <small class="text-secondary" style="font-size: 0.65rem;">SATEC</small>
+            </div>
+        </div>
         <button class="btn btn-link text-white p-0 text-decoration-none" id="sidebarToggle">
             <i class="fas fa-bars fs-5"></i>
         </button>

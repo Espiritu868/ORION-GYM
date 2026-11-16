@@ -77,29 +77,27 @@ $ultimo_pago = $stmt_pago->fetch(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($cliente['nombre_completo']) ?></title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f59e0b">
+    <meta name="theme-color" content="#d4af37">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png">
+    <link rel="apple-touch-icon" href="logo.jpeg">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="bg-neutral-950 text-white min-h-screen pb-24 selection:bg-amber-500 selection:text-black">
+<body class="bg-[#0b0f19] text-white min-h-screen pb-24 selection:bg-[#d4af37] selection:text-black">
 
     <!-- Top Navigation Bar -->
-    <header class="sticky top-0 z-30 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 px-5 py-4 flex items-center justify-between">
+    <header class="sticky top-0 z-30 bg-[#111827]/90 backdrop-blur-md border-b border-[#d4af37]/20 px-5 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-neutral-950 shadow-md shadow-amber-500/20 font-bold">
-                <i class="fa-solid fa-dumbbell"></i>
-            </div>
+            <img src="logo.jpeg" alt="Logo Fortia Gym" class="w-10 h-10 rounded-full object-cover border-2 border-[#d4af37] shadow-md shadow-[#d4af37]/20">
             <div>
-                <h1 class="text-sm font-bold tracking-tight text-white leading-none">ORION GYM</h1>
-                <span class="text-[11px] text-neutral-400">Portal de Socio</span>
+                <h1 class="text-sm font-black tracking-tight text-white leading-none">FORTIA <span class="text-[#dc2626]">GYM</span></h1>
+                <span class="text-[10px] text-neutral-400 font-medium">SATEC Socios</span>
             </div>
         </div>
 
-        <a href="logout.php" title="Cerrar sesión" class="w-9 h-9 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 flex items-center justify-center text-neutral-300 transition-colors">
+        <a href="logout.php" title="Cerrar sesión" class="w-9 h-9 rounded-xl bg-neutral-800/80 hover:bg-neutral-800 border border-neutral-700 flex items-center justify-center text-neutral-300 transition-colors">
             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
         </a>
     </header>
@@ -230,9 +228,9 @@ $ultimo_pago = $stmt_pago->fetch(PDO::FETCH_ASSOC);
     </main>
 
     <!-- Barra de Navegación Inferior (Estilo App Nativa) -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-neutral-900/95 backdrop-blur-xl border-t border-neutral-800 py-2">
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#111827]/95 backdrop-blur-xl border-t border-[#d4af37]/20 py-2">
         <div class="max-w-md mx-auto grid grid-cols-3 text-center">
-            <a href="dashboard.php" class="flex flex-col items-center gap-1 text-amber-500 font-bold py-1">
+            <a href="dashboard.php" class="flex flex-col items-center gap-1 text-[#d4af37] font-bold py-1">
                 <i class="fa-solid fa-house text-lg"></i>
                 <span class="text-[10px]">Inicio</span>
             </a>

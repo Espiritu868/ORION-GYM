@@ -18,34 +18,38 @@ require_once 'config/config.php';
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; }
-        body::before, body::after { content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%; z-index: 1; filter: blur(80px); opacity: 0.15; }
-        body::before { background-color: #27ae60; top: 10%; left: 15%; }
-        body::after { background-color: #e3000f; bottom: 10%; right: 15%; }
-        .login-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); z-index: 10; animation: cardFade 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { background: radial-gradient(circle at center, #1f2937 0%, #0b0f19 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; overflow: hidden; position: relative; }
+        body::before, body::after { content: ''; position: absolute; width: 340px; height: 340px; border-radius: 50%; z-index: 1; filter: blur(90px); opacity: 0.2; }
+        body::before { background-color: #d4af37; top: 10%; left: 15%; }
+        body::after { background-color: #dc2626; bottom: 10%; right: 15%; }
+        .login-card { background: rgba(17, 24, 39, 0.75); border: 1px solid rgba(212, 175, 55, 0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 28px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 25px rgba(212, 175, 55, 0.1); z-index: 10; animation: cardFade 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes cardFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .login-header { text-align: center; margin-bottom: 35px; }
-        .login-logo { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .login-logo span { color: #e3000f; }
-        .login-subtitle { font-size: 0.6rem; color: #94a3b8; font-weight: 500; letter-spacing: 0.5px; line-height: 1.3; }
+        .login-header { text-align: center; margin-bottom: 30px; }
+        .login-brand-img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid #d4af37; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); margin: 0 auto 15px; display: block; object-fit: cover; }
+        .login-logo { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; letter-spacing: 1px; margin-bottom: 4px; }
+        .login-logo span { color: #dc2626; }
+        .login-subtitle { font-size: 0.75rem; color: #d4af37; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+        .login-company { font-size: 0.65rem; color: #9ca3af; font-weight: 400; }
         .form-group { margin-bottom: 22px; position: relative; }
-        .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         .input-wrapper { position: relative; }
         .input-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 1rem; transition: 0.2s; }
-        .login-input { width: 100%; height: 48px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 0 20px 0 45px; color: #fff; font-size: 0.95rem; font-family: inherit; outline: none; transition: all 0.2s; }
-        .login-input:focus { border-color: #27ae60; background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.15); }
-        .login-input:focus + i { color: #27ae60; }
-        .btn-login { width: 100%; height: 50px; background: #27ae60; color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-login:hover { background: #219653; }
-        .alert-box { background: rgba(227, 0, 15, 0.15); border: 1px solid rgba(227, 0, 15, 0.25); border-radius: 12px; padding: 12px 16px; color: #fca5a5; font-size: 0.85rem; margin-bottom: 20px; display: none; align-items: center; gap: 10px; animation: shake 0.4s ease; }
+        .login-input { width: 100%; height: 48px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 12px; padding: 0 20px 0 45px; color: #fff; font-size: 0.95rem; font-family: inherit; outline: none; transition: all 0.2s; }
+        .login-input:focus { border-color: #d4af37; background: rgba(0, 0, 0, 0.6); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2); }
+        .login-input:focus + i { color: #d4af37; }
+        .btn-login { width: 100%; height: 50px; background: linear-gradient(135deg, #d4af37 0%, #b8972e 100%); color: #000; border: none; border-radius: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all 0.2s; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 20px -5px rgba(212, 175, 55, 0.4); }
+        .btn-login:hover { transform: translateY(-1px); box-shadow: 0 12px 24px -5px rgba(212, 175, 55, 0.6); background: linear-gradient(135deg, #dfbc45 0%, #c4a132 100%); }
+        .alert-box { background: rgba(220, 38, 38, 0.15); border: 1px solid rgba(220, 38, 38, 0.35); border-radius: 12px; padding: 12px 16px; color: #fca5a5; font-size: 0.85rem; margin-bottom: 20px; display: none; align-items: center; gap: 10px; animation: shake 0.4s ease; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
     </style>
 </head>
 <body>
     <div class="login-card">
         <div class="login-header">
-            <div class="login-logo">ORION<span>SYS</span></div>
-            <div class="login-subtitle">SISTEMA DE ORGANIZACION DE RECURSOS, INVENTARIOS, OPERACIONES Y NEGOCIOS<br><br><b><?= SYSTEM_NAME ?></b></div>
+            <img src="assets/img/logo.jpeg" alt="Logo Fortia Gym" class="login-brand-img">
+            <div class="login-logo">FORTIA <span>GYM</span></div>
+            <div class="login-subtitle">Sistema de Gestión & Fitness</div>
+            <div class="login-company">Desarrollado por <strong><?= COMPANY_NAME ?></strong></div>
         </div>
         <div id="login-alert" class="alert-box">
             <i class="fas fa-exclamation-circle"></i>

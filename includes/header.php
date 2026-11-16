@@ -14,11 +14,18 @@
     <!-- IMask for input formatting -->
     <script src="https://unpkg.com/imask"></script>
     <style>
+        :root {
+            --fortia-gold: #d4af37;
+            --fortia-gold-hover: #b8972e;
+            --fortia-red: #dc2626;
+            --fortia-dark: #0f172a;
+        }
         body { background: #f8fafc; color: #333; font-family: 'Outfit'; overflow-x: hidden; }
         
         .sidebar { 
             min-height: 100vh; 
-            background: #0f172a; 
+            background: linear-gradient(180deg, #111827 0%, #030712 100%); 
+            border-right: 1px solid rgba(212, 175, 55, 0.2);
             color: white; 
             padding: 20px 15px;
             width: 250px;
@@ -72,13 +79,13 @@
             }
         }
 
-        .sidebar a { color: #cbd5e1; text-decoration: none; display: flex; align-items: center; padding: 12px 10px; border-radius: 5px; margin-bottom: 5px; white-space: nowrap; }
-        .sidebar a:hover, .sidebar a.active { background: rgba(255,255,255,0.1); color: white; }
+        .sidebar a { color: #cbd5e1; text-decoration: none; display: flex; align-items: center; padding: 12px 10px; border-radius: 8px; margin-bottom: 5px; white-space: nowrap; transition: all 0.2s; }
+        .sidebar a:hover, .sidebar a.active { background: rgba(212, 175, 55, 0.15); color: #d4af37; border-left: 3px solid #d4af37; font-weight: 600; }
         .sidebar i { width: 25px; text-align: center; }
         .sidebar.collapsed .sidebar-text, .sidebar.collapsed h4 { display: none; }
         .sidebar.collapsed a { justify-content: center; }
         .sidebar.collapsed i { margin-right: 0 !important; font-size: 1.2rem; }
-        .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between;}
+        .topbar { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid rgba(212, 175, 55, 0.25); }
         .content { padding: 30px; }
         .table-card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .client-photo-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }

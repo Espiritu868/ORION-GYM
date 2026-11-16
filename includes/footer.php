@@ -59,5 +59,8 @@
             previewModalInstance.show();
         }
     </script>
+    <footer class="text-center py-3 text-muted small border-top bg-white mt-auto">
+        <span>&copy; <?= date('Y') ?> <strong><?= SYSTEM_NAME ?></strong> | Desarrollado por <strong><?= COMPANY_NAME ?></strong></span>
+    </footer>
 </body>
 </html>

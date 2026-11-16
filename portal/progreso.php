@@ -38,24 +38,25 @@ function diff_badge($val1, $val2, $unidad = 'lbs', $invert = false) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi Progreso - Orion Gym</title>
+    <title>Mi Progreso - Fortia Gym</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#f59e0b">
+    <meta name="theme-color" content="#d4af37">
+    <link rel="apple-touch-icon" href="logo.jpeg">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
-<body class="bg-neutral-950 text-white min-h-screen pb-24 selection:bg-amber-500 selection:text-black">
+<body class="bg-[#0b0f19] text-white min-h-screen pb-24 selection:bg-[#d4af37] selection:text-black">
 
     <!-- Header -->
-    <header class="sticky top-0 z-30 bg-neutral-900/80 backdrop-blur-md border-b border-neutral-800 px-5 py-4 flex items-center justify-between">
+    <header class="sticky top-0 z-30 bg-[#111827]/90 backdrop-blur-md border-b border-[#d4af37]/20 px-5 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="dashboard.php" class="w-9 h-9 rounded-xl bg-neutral-800 hover:bg-neutral-700 flex items-center justify-center text-neutral-300">
                 <i class="fa-solid fa-arrow-left text-xs"></i>
             </a>
             <div>
-                <h1 class="text-sm font-bold tracking-tight text-white leading-none">Mi Progreso</h1>
-                <span class="text-[11px] text-neutral-400">Historial y Antropometría</span>
+                <h1 class="text-sm font-black tracking-tight text-white leading-none">Mi Progreso</h1>
+                <span class="text-[10px] text-[#d4af37]">Fortia Gym • SATEC</span>
             </div>
         </div>
     </header>
@@ -163,7 +164,7 @@ function diff_badge($val1, $val2, $unidad = 'lbs', $invert = false) {
     </main>
 
     <!-- Barra de Navegación Inferior -->
-    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-neutral-900/95 backdrop-blur-xl border-t border-neutral-800 py-2">
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-[#111827]/95 backdrop-blur-xl border-t border-[#d4af37]/20 py-2">
         <div class="max-w-md mx-auto grid grid-cols-3 text-center">
             <a href="dashboard.php" class="flex flex-col items-center gap-1 text-neutral-400 hover:text-white py-1">
                 <i class="fa-solid fa-house text-lg"></i>
@@ -173,7 +174,7 @@ function diff_badge($val1, $val2, $unidad = 'lbs', $invert = false) {
                 <i class="fa-solid fa-dumbbell text-lg"></i>
                 <span class="text-[10px]">Rutinas</span>
             </a>
-            <a href="progreso.php" class="flex flex-col items-center gap-1 text-amber-500 font-bold py-1">
+            <a href="progreso.php" class="flex flex-col items-center gap-1 text-[#d4af37] font-bold py-1">
                 <i class="fa-solid fa-chart-pie text-lg"></i>
                 <span class="text-[10px]">Progreso</span>
             </a>
