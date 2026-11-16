@@ -2,7 +2,7 @@
 define('SYSTEM_NAME', 'FORTIA GYM');
 define('SYSTEM_ID', 2);
 define('CLIENT_RTN', '16251998000746'); // For license validation
-define('COMPANY_NAME', 'SATEC (Sistemas y Automatizacion Tecnologica S de R.L)');
+define('COMPANY_NAME', 'Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)');
 define('COMPANY_SHORT', 'SATEC');
 
 // URL de la API construida dinámicamente usando las constantes de arriba

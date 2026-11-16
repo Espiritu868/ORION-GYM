@@ -188,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Footer -->
     <div class="w-full max-w-md mx-auto py-5 text-center text-xs text-neutral-500">
         <p>&copy; <?= date('Y') ?> <strong>FORTIA GYM</strong></p>
-        <p class="text-[11px] text-neutral-600 mt-1">Desarrollado por <strong>SATEC</strong> (Sistemas y Automatizacion Tecnologica S de R.L)</p>
+        <p class="text-[11px] text-neutral-600 mt-1">Desarrollado por <strong>Sistemas y Automatizacion Tecnologica S de R.L. (SATEC)</strong></p>
     </div>
 
     <script>

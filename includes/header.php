@@ -45,6 +45,8 @@
             margin-left: 250px;
             width: calc(100% - 250px);
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         #main-content.expanded {
             margin-left: 80px;
